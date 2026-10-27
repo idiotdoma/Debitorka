@@ -17,6 +17,9 @@ export default function FinancialAnalyticsPage() {
   const [categoryFilter, setCategoryFilter] = useState<DebtCategory | 'all'>('all');
   const [counterpartyFilter, setCounterpartyFilter] = useState<string>('');
   const [ratingSortBy, setRatingSortBy] = useState<'totalDebt' | 'overdueDebt' | 'oldestOverdue' | 'overdueDocuments'>('totalDebt');
+  const [minAmount, setMinAmount] = useState<string>('');
+  const [maxAmount, setMaxAmount] = useState<string>('');
+  const [hasOverdue, setHasOverdue] = useState<boolean | null>(null);
 
   const data = useMemo(() => {
     if (!session || !organization) return null;
@@ -34,6 +37,21 @@ export default function FinancialAnalyticsPage() {
     if (counterpartyFilter) {
       debts = debts.filter(d => 
         d.counterpartyName.toLowerCase().includes(counterpartyFilter.toLowerCase())
+      );
+    }
+    if (minAmount) {
+      const minCents = Math.round(parseFloat(minAmount) * 100);
+      debts = debts.filter(d => d.amountCents >= minCents);
+    }
+    if (maxAmount) {
+      const maxCents = Math.round(parseFloat(maxAmount) * 100);
+      debts = debts.filter(d => d.amountCents <= maxCents);
+    }
+    if (hasOverdue !== null) {
+      debts = debts.filter(d => 
+        hasOverdue 
+          ? (d.overdueDays !== null && d.overdueDays > 0)
+          : (d.overdueDays === null || d.overdueDays === 0)
       );
     }
 
@@ -55,7 +73,7 @@ export default function FinancialAnalyticsPage() {
       unsupportedCurrencyCount: unsupportedCurrencyDebts.length,
       negativeCount: negativeDebts.length,
     };
-  }, [session, organization, categoryFilter, counterpartyFilter, ratingSortBy]);
+  }, [session, organization, categoryFilter, counterpartyFilter, ratingSortBy, minAmount, maxAmount, hasOverdue]);
 
   if (!data) {
     return (
@@ -112,6 +130,56 @@ export default function FinancialAnalyticsPage() {
               <option value="oldestOverdue" className="bg-slate-800">По старости просрочки</option>
               <option value="overdueDocuments" className="bg-slate-800">По количеству просроченных</option>
             </select>
+          </div>
+        </div>
+        
+        {/* Расширенные фильтры */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-white/10">
+          <div>
+            <label className="block text-sm text-white/60 mb-1">Мин. сумма (₽)</label>
+            <input
+              type="number"
+              value={minAmount}
+              onChange={(e) => setMinAmount(e.target.value)}
+              placeholder="0"
+              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder:text-white/30"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/60 mb-1">Макс. сумма (₽)</label>
+            <input
+              type="number"
+              value={maxAmount}
+              onChange={(e) => setMaxAmount(e.target.value)}
+              placeholder="∞"
+              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder:text-white/30"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/60 mb-1">Просрочка</label>
+            <select
+              value={hasOverdue === null ? 'all' : hasOverdue ? 'yes' : 'no'}
+              onChange={(e) => setHasOverdue(e.target.value === 'all' ? null : e.target.value === 'yes')}
+              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
+            >
+              <option value="all" className="bg-slate-800">Все</option>
+              <option value="yes" className="bg-slate-800">Только просроченные</option>
+              <option value="no" className="bg-slate-800">Без просрочки</option>
+            </select>
+          </div>
+          <div className="flex items-end">
+            <button
+              onClick={() => {
+                setCategoryFilter('all');
+                setCounterpartyFilter('');
+                setMinAmount('');
+                setMaxAmount('');
+                setHasOverdue(null);
+              }}
+              className="w-full px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-sm transition"
+            >
+              Сбросить фильтры
+            </button>
           </div>
         </div>
       </div>

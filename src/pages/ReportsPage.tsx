@@ -1,20 +1,23 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { debtStore, importStore } from '../lib/store';
+import { debtStore, importStore, savedReportViewStore } from '../lib/store';
 import { getActualDebtRecord, filterValidDebts } from '../lib/debtCalculations';
-import { formatCurrency, formatDate } from '../lib/calculations';
+import { formatCurrency, formatDate, generateId } from '../lib/calculations';
 import { DEBT_CATEGORIES } from '../lib/constants';
-import { DebtCategory, DebtRecord } from '../types/models';
-import { FileText, Download, Filter } from 'lucide-react';
+import { DebtCategory, DebtRecord, SavedReportView } from '../types/models';
+import { FileText, Download, Filter, Save, Trash2, FolderOpen } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 type ReportType = 'registry' | 'overdue' | 'aging' | 'top_debtors' | 'no_due_date' | 'promises_check';
 
 export default function ReportsPage() {
-  const { session, organization } = useAuth();
+  const { session, organization, user } = useAuth();
   const [reportType, setReportType] = useState<ReportType>('registry');
   const [categoryFilter, setCategoryFilter] = useState<DebtCategory | 'all'>('all');
   const [counterpartyFilter, setCounterpartyFilter] = useState('');
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showLoadModal, setShowLoadModal] = useState(false);
+  const [saveName, setSaveName] = useState('');
 
   const getReportTitle = (type: ReportType): string => {
     const titles: Record<ReportType, string> = {
@@ -99,6 +102,49 @@ export default function ReportsPage() {
 
     return { data: debts, title, columns };
   }, [session, organization, reportType, categoryFilter, counterpartyFilter]);
+
+  // Получаем сохранённые представления
+  const savedViews = useMemo(() => {
+    if (!session || !organization || !user) return [];
+    return savedReportViewStore.getByUser(user.id, organization.id, session);
+  }, [session, organization, user]);
+
+  // Сохранение представления
+  const handleSaveView = () => {
+    if (!saveName.trim() || !session || !organization || !user) return;
+    
+    const view: SavedReportView = {
+      id: generateId('view'),
+      organizationId: organization.id,
+      userId: user.id,
+      name: saveName.trim(),
+      filters: {
+        reportType,
+        categoryFilter,
+        counterpartyFilter,
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    
+    savedReportViewStore.create(view);
+    setSaveName('');
+    setShowSaveModal(false);
+  };
+
+  // Загрузка представления
+  const handleLoadView = (view: SavedReportView) => {
+    setReportType(view.filters.reportType || 'registry');
+    setCategoryFilter(view.filters.categoryFilter || 'all');
+    setCounterpartyFilter(view.filters.counterpartyFilter || '');
+    setShowLoadModal(false);
+  };
+
+  // Удаление представления
+  const handleDeleteView = (viewId: string) => {
+    if (!session || !organization) return;
+    savedReportViewStore.delete(viewId, organization.id, session);
+  };
 
   const exportToCSV = () => {
     if (!reportData.data.length) return;
@@ -262,8 +308,8 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      {/* Кнопки экспорта */}
-      <div className="flex gap-3">
+      {/* Кнопки экспорта и представлений */}
+      <div className="flex gap-3 flex-wrap">
         <button
           onClick={exportToCSV}
           disabled={!reportData.data.length}
@@ -279,6 +325,22 @@ export default function ReportsPage() {
         >
           <Download className="w-4 h-4" />
           Экспорт в Excel
+        </button>
+        <div className="flex-1" />
+        <button
+          onClick={() => setShowSaveModal(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm transition"
+        >
+          <Save className="w-4 h-4" />
+          Сохранить представление
+        </button>
+        <button
+          onClick={() => setShowLoadModal(true)}
+          disabled={savedViews.length === 0}
+          className="flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 disabled:bg-yellow-800 disabled:cursor-not-allowed text-white rounded-lg text-sm transition"
+        >
+          <FolderOpen className="w-4 h-4" />
+          Загрузить ({savedViews.length})
         </button>
       </div>
 
@@ -343,6 +405,78 @@ export default function ReportsPage() {
           Экспорт работает корректно, но сохранённые представления не синхронизируются между пользователями.
         </p>
       </div>
+
+      {/* Модальное окно сохранения представления */}
+      {showSaveModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 border border-white/10 rounded-2xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-white mb-4">Сохранить представление</h3>
+            <input
+              type="text"
+              value={saveName}
+              onChange={(e) => setSaveName(e.target.value)}
+              placeholder="Название представления..."
+              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm mb-4"
+              autoFocus
+            />
+            <div className="flex gap-3">
+              <button
+                onClick={handleSaveView}
+                disabled={!saveName.trim()}
+                className="flex-1 py-2 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-800 disabled:cursor-not-allowed text-white rounded-lg text-sm transition"
+              >
+                Сохранить
+              </button>
+              <button
+                onClick={() => { setShowSaveModal(false); setSaveName(''); }}
+                className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-sm transition"
+              >
+                Отмена
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно загрузки представления */}
+      {showLoadModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 border border-white/10 rounded-2xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-white mb-4">Загрузить представление</h3>
+            <div className="space-y-2 mb-4 max-h-96 overflow-y-auto">
+              {savedViews.map(view => (
+                <div key={view.id} className="bg-white/5 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-white font-medium">{view.name}</span>
+                    <button
+                      onClick={() => handleDeleteView(view.id)}
+                      className="p-1 hover:bg-red-500/20 rounded transition"
+                      title="Удалить"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-400" />
+                    </button>
+                  </div>
+                  <div className="text-xs text-white/40 mb-2">
+                    {getReportTitle(view.filters.reportType)} • {formatDate(view.updatedAt)}
+                  </div>
+                  <button
+                    onClick={() => handleLoadView(view)}
+                    className="w-full py-1.5 bg-yellow-600 hover:bg-yellow-500 text-white rounded text-xs transition"
+                  >
+                    Загрузить
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowLoadModal(false)}
+              className="w-full py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-sm transition"
+            >
+              Закрыть
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

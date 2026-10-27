@@ -91,12 +91,71 @@ export function runQualityChecks(
         detectedAt: new Date().toISOString(),
       });
     }
+    
+    // Проверка 5: Отсутствие контрагента
+    if (!debt.counterpartyName || debt.counterpartyName.trim() === '') {
+      issues.push({
+        id: generateId('issue'),
+        organizationId,
+        type: 'missing_counterparty',
+        severity: 'error',
+        debtRecordId: debt.id,
+        description: `Документ ${debt.docNumber} не имеет указанного контрагента`,
+        detectedAt: new Date().toISOString(),
+      });
+    }
+    
+    // Проверка 6: Отсутствие номера документа
+    if (!debt.docNumber || debt.docNumber.trim() === '') {
+      issues.push({
+        id: generateId('issue'),
+        organizationId,
+        type: 'invalid_date',
+        severity: 'error',
+        debtRecordId: debt.id,
+        description: `Документ от ${debt.counterpartyName} не имеет номера`,
+        detectedAt: new Date().toISOString(),
+      });
+    }
+    
+    // Проверка 7: Некорректная дата документа
+    if (debt.docDate) {
+      const docDate = new Date(debt.docDate);
+      if (isNaN(docDate.getTime())) {
+        issues.push({
+          id: generateId('issue'),
+          organizationId,
+          type: 'invalid_date',
+          severity: 'error',
+          debtRecordId: debt.id,
+          description: `Документ ${debt.docNumber} имеет некорректную дату: ${debt.docDate}`,
+          detectedAt: new Date().toISOString(),
+        });
+      }
+    }
+    
+    // Проверка 8: Отсутствие lastSourceUpdate
+    if (!debt.lastSourceUpdate) {
+      issues.push({
+        id: generateId('issue'),
+        organizationId,
+        type: 'outdated_data',
+        severity: 'warning',
+        debtRecordId: debt.id,
+        description: `Документ ${debt.docNumber} не имеет даты последнего обновления источника`,
+        detectedAt: new Date().toISOString(),
+      });
+    }
   });
   
-  // Проверка 5: Возможные дубликаты
+  // Проверка 9: Возможные дубликаты (с нормализацией ключей)
   const seen = new Map<string, DebtRecord>();
   debts.forEach(debt => {
-    const key = `${debt.counterpartyName}|${debt.docNumber}`;
+    // Нормализация: нижний регистр, удаление лишних пробелов
+    const normalizedName = (debt.counterpartyName || '').toLowerCase().trim().replace(/\s+/g, ' ');
+    const normalizedDocNumber = (debt.docNumber || '').toLowerCase().trim();
+    const key = `${normalizedName}|${normalizedDocNumber}`;
+    
     if (seen.has(key)) {
       issues.push({
         id: generateId('issue'),
