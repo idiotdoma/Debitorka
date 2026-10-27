@@ -3,7 +3,7 @@
 // Все операции проверяют organizationId
 // ============================================================
 
-import { Organization, User, AuthSession, DebtRecord, ContactInfo, PaymentPromise, Task, Communication, Notification, ActivityAudit, ImportBatch, UUID, Team, Invitation, CounterpartyAssignment, UserPreferences, DebtSnapshot, DataQualityIssue, SavedReportView } from '../types/models';
+import { Organization, User, AuthSession, DebtRecord, ContactInfo, PaymentPromise, Task, Communication, Notification, ActivityAudit, ImportBatch, UUID, Team, Invitation, CounterpartyAssignment, UserPreferences, DebtSnapshot, DataQualityIssue, SavedReportView, CounterpartyNote } from '../types/models';
 import type { IntegrationConnection, SyncHistory } from '../types/integration';
 
 const STORAGE_PREFIX = 'debitor_';
@@ -826,9 +826,51 @@ export const savedReportViewStore = {
   },
 };
 
+// --- Counterparty Notes (с tenant isolation) ---
+
+export const noteStore = {
+  getAll(organizationId: UUID, session: AuthSession | null): CounterpartyNote[] {
+    assertTenantAccess(organizationId, session);
+    return getItem<CounterpartyNote>('notes').filter(n => n.organizationId === organizationId);
+  },
+  
+  getByCounterparty(counterpartyName: string, organizationId: UUID, session: AuthSession | null): CounterpartyNote[] {
+    assertTenantAccess(organizationId, session);
+    return getItem<CounterpartyNote>('notes').filter(n => 
+      n.counterpartyName === counterpartyName && n.organizationId === organizationId
+    );
+  },
+  
+  create(note: CounterpartyNote): CounterpartyNote {
+    const notes = getItem<CounterpartyNote>('notes');
+    notes.push(note);
+    setItem('notes', notes);
+    return note;
+  },
+  
+  update(id: UUID, updateData: Partial<CounterpartyNote>, organizationId: UUID, session: AuthSession | null): CounterpartyNote | undefined {
+    assertTenantAccess(organizationId, session);
+    const notes = getItem<CounterpartyNote>('notes');
+    const idx = notes.findIndex(n => n.id === id && n.organizationId === organizationId);
+    if (idx === -1) return undefined;
+    notes[idx] = { ...notes[idx], ...updateData, updatedAt: new Date().toISOString() };
+    setItem('notes', notes);
+    return notes[idx];
+  },
+  
+  delete(id: UUID, organizationId: UUID, session: AuthSession | null): boolean {
+    assertTenantAccess(organizationId, session);
+    const notes = getItem<CounterpartyNote>('notes');
+    const filtered = notes.filter(n => !(n.id === id && n.organizationId === organizationId));
+    if (filtered.length === notes.length) return false;
+    setItem('notes', filtered);
+    return true;
+  },
+};
+
 // --- Reset all data (для тестов) ---
 
 export function resetAllData(): void {
-  const keys = ['organizations', 'users', 'session', 'debts', 'contacts', 'promises', 'tasks', 'communications', 'notifications', 'audit', 'imports', 'integrations', 'sync_history', 'teams', 'invitations', 'assignments', 'preferences', 'snapshots', 'data_quality', 'saved_reports'];
+  const keys = ['organizations', 'users', 'session', 'debts', 'contacts', 'promises', 'tasks', 'communications', 'notifications', 'audit', 'imports', 'integrations', 'sync_history', 'teams', 'invitations', 'assignments', 'preferences', 'snapshots', 'data_quality', 'saved_reports', 'notes'];
   keys.forEach(key => localStorage.removeItem(getKey(key)));
 }

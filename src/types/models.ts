@@ -139,6 +139,18 @@ export interface UserPreferences {
   dashboardLayout?: Record<string, any>;
 }
 
+// --- Быстрые заметки к контрагентам ---
+
+export interface CounterpartyNote {
+  id: UUID;
+  organizationId: UUID;
+  counterpartyName: string;
+  note: string;
+  createdBy: UUID;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AuthSession {
   userId: UUID;
   organizationId: UUID;

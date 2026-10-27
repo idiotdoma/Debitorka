@@ -21,6 +21,7 @@ import PaymentCalendarPage from './pages/PaymentCalendarPage';
 import CollectionPrioritiesPage from './pages/CollectionPrioritiesPage';
 import ReportsPage from './pages/ReportsPage';
 import DataQualityPage from './pages/DataQualityPage';
+import CounterpartyNotesPage from './pages/CounterpartyNotesPage';
 import Layout from './components/Layout';
 
 function AppContent() {
@@ -77,6 +78,7 @@ function AppContent() {
       case 'collection-priorities': return <CollectionPrioritiesPage />;
       case 'reports': return <ReportsPage />;
       case 'data-quality': return <DataQualityPage />;
+      case 'notes': return <CounterpartyNotesPage />;
       default: return <DashboardPage />;
     }
   };
