@@ -54,7 +54,7 @@ export default function UsersPage() {
             return (
               <div key={u.id} className="flex items-center gap-4 bg-white/5 rounded-xl p-3">
                 <div className="w-10 h-10 bg-blue-600/30 rounded-lg flex items-center justify-center">
-                  <span className="text-blue-300 font-medium">{u.firstName.charAt(0)}</span>
+                  <span className="text-blue-300 font-medium">{(u.firstName || u.name || '?').charAt(0)}</span>
                 </div>
                 <div className="flex-1">
                   <p className="text-white text-sm font-medium">{u.firstName} {u.lastName}</p>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import DebtListPage from './pages/DebtListPage';
 import UsersPage from './pages/UsersPage';
 import Layout from './components/Layout';
 
@@ -24,6 +25,7 @@ function AppContent() {
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard': return <DashboardPage />;
+      case 'debts': return <DebtListPage />;
       case 'users': return <UsersPage />;
       default: return <DashboardPage />;
     }

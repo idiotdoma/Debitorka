@@ -1,127 +1,163 @@
 // ============================================================
-// Инициализация демо-данных
+// Инициализация демо-данных — Этап 2
 // ============================================================
 
-import { Organization, User } from '../types/models';
-import { hashPassword, generateId } from './utils';
-import { orgStore, userStore, debtStore, teamStore } from './store';
+import { Organization, User, DebtRecord } from '../types/models';
+import { DEMO_ORG_A, DEMO_ORG_B } from './constants';
+import { hashPassword, generateId, calculateOverdueDays, categorizeDebt, generateDocumentKey } from './calculations';
+import { orgStore, userStore, debtStore, resetAllData } from './store';
 
 export function initializeDemoData(): void {
+  // Миграция: если есть старые данные без новых полей — сбрасываем
+  const existingOrgs = orgStore.getAll();
+  if (existingOrgs.length > 0) {
+    const hasOldFormat = existingOrgs.some(o => !('timezone' in o) || !('staleDataThresholdHours' in o));
+    if (hasOldFormat) {
+      // Сбрасываем все данные для чистой миграции
+      resetAllData();
+    }
+  }
+  
   if (orgStore.getAll().length > 0) return;
   
-  // Создаём организацию
-  const org: Organization = {
-    id: generateId('org'),
-    name: 'ООО «Демо Компания»',
-    timezone: 'Europe/Moscow',
+  const orgA: Organization = {
+    id: DEMO_ORG_A.id,
+    name: DEMO_ORG_A.name,
+    timezone: DEMO_ORG_A.timezone,
+    staleDataThresholdHours: DEMO_ORG_A.staleDataThresholdHours,
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   };
-  orgStore.create(org);
   
-  // Создаём команду
-  const team = {
-    id: generateId('team'),
-    organizationId: org.id,
-    name: 'Отдел работы с задолженностью',
-    description: 'Основная команда',
+  const orgB: Organization = {
+    id: DEMO_ORG_B.id,
+    name: DEMO_ORG_B.name,
+    timezone: DEMO_ORG_B.timezone,
+    staleDataThresholdHours: DEMO_ORG_B.staleDataThresholdHours,
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   };
-  teamStore.create(team);
   
-  // Создаём владельца
-  const owner: User = {
-    id: generateId('user'),
-    email: 'owner@demo.ru',
-    passwordHash: hashPassword('owner123'),
-    firstName: 'Иван',
-    lastName: 'Владелец',
-    organizationId: org.id,
-    role: 'owner',
-    teamId: team.id,
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  userStore.create(owner);
+  orgStore.create(orgA);
+  orgStore.create(orgB);
   
-  // Создаём руководителя
-  const manager: User = {
-    id: generateId('user'),
-    email: 'manager@demo.ru',
-    passwordHash: hashPassword('manager123'),
-    firstName: 'Пётр',
-    lastName: 'Руководитель',
-    organizationId: org.id,
-    role: 'manager',
-    teamId: team.id,
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  userStore.create(manager);
-  
-  // Обновляем команду — назначаем руководителя
-  teamStore.update(team.id, { managerId: manager.id }, org.id, {
-    userId: owner.id,
-    organizationId: org.id,
-    token: 'init',
-    expiresAt: new Date().toISOString(),
-  });
-  
-  // Создаём сотрудника
-  const employee: User = {
-    id: generateId('user'),
-    email: 'employee@demo.ru',
-    passwordHash: hashPassword('employee123'),
-    firstName: 'Мария',
-    lastName: 'Сотрудник',
-    organizationId: org.id,
-    role: 'employee',
-    teamId: team.id,
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  userStore.create(employee);
-  
-  // Создаём наблюдателя
-  const viewer: User = {
-    id: generateId('user'),
-    email: 'viewer@demo.ru',
-    passwordHash: hashPassword('viewer123'),
-    firstName: 'Алексей',
-    lastName: 'Наблюдатель',
-    organizationId: org.id,
-    role: 'viewer',
-    teamId: team.id,
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  userStore.create(viewer);
-  
-  // Создаём демо-задолженности
-  const debts = [
-    { counterparty: 'ООО «Клиент А»', amount: 15000000, daysOverdue: 45 },
-    { counterparty: 'ИП Иванов И.И.', amount: 3400000, daysOverdue: 120 },
-    { counterparty: 'АО «Партнёр»', amount: 28000000, daysOverdue: 15 },
-    { counterparty: 'ООО «Заказчик»', amount: 5670000, daysOverdue: 200 },
-    { counterparty: 'ЗАО «Покупатель»', amount: 8900000, daysOverdue: 0 },
+  const users: User[] = [
+    {
+      id: generateId('user'),
+      email: 'admin@alfa.ru',
+      passwordHash: hashPassword('admin123'),
+      name: 'Иванов Иван (Администратор)',
+      organizationId: orgA.id,
+      role: 'admin',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: generateId('user'),
+      email: 'manager@alfa.ru',
+      passwordHash: hashPassword('manager123'),
+      name: 'Петрова Мария',
+      organizationId: orgA.id,
+      role: 'manager',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: generateId('user'),
+      email: 'admin@beta.ru',
+      passwordHash: hashPassword('admin123'),
+      name: 'Сидоров Алексей (Администратор)',
+      organizationId: orgB.id,
+      role: 'admin',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: generateId('user'),
+      email: 'viewer@beta.ru',
+      passwordHash: hashPassword('viewer123'),
+      name: 'Козлова Елена',
+      organizationId: orgB.id,
+      role: 'viewer',
+      createdAt: new Date().toISOString(),
+    },
   ];
   
-  debts.forEach((debt, i) => {
-    const dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() - debt.daysOverdue);
+  users.forEach(user => userStore.create(user));
+  
+  // Обновляем роли для демо-пользователей
+  const adminA = userStore.getAll().find(u => u.email === 'admin@alfa.ru');
+  if (adminA) {
+    userStore.update(adminA.id, { role: 'owner' });
+  }
+  
+  const adminB = userStore.getAll().find(u => u.email === 'admin@beta.ru');
+  if (adminB) {
+    userStore.update(adminB.id, { role: 'owner' });
+  }
+  
+  // Создаём демо-данные задолженности для Org A
+  const now = new Date();
+  const demoDebtsA = createDemoDebts(orgA.id, [
+    { name: 'ООО «СтройМонтаж»', amountCents: 125000000, daysOverdue: 45, docNo: 'СЧ-001/24' },
+    { name: 'ИП Козлов А.В.', amountCents: 34000000, daysOverdue: 120, docNo: 'СЧ-015/24' },
+    { name: 'АО «ТехноСервис»', amountCents: 280000000, daysOverdue: 15, docNo: 'СЧ-042/24' },
+    { name: 'ООО «ЛогистикПро»', amountCents: 56700000, daysOverdue: 200, docNo: 'СЧ-008/24' },
+    { name: 'ЗАО «МегаТорг»', amountCents: 89000000, daysOverdue: 0, docNo: 'СЧ-055/24' },
+    { name: 'ООО «ФудСервис»', amountCents: 15600000, daysOverdue: 60, docNo: 'СЧ-023/24' },
+    { name: 'ИП Новиков С.П.', amountCents: 450000000, daysOverdue: 95, docNo: 'СЧ-011/24' },
+    { name: 'ООО «АвтоКомплект»', amountCents: 78000000, daysOverdue: 5, docNo: 'СЧ-067/24' },
+    { name: 'ООО «Без срока»', amountCents: 19000000, daysOverdue: null, docNo: 'СЧ-077/24' },
+  ]);
+  
+  demoDebtsA.forEach(debt => debtStore.create(debt));
+  
+  // Создаём демо-данные для Org B
+  const demoDebtsB = createDemoDebts(orgB.id, [
+    { name: 'ООО «ПромИнвест»', amountCents: 320000000, daysOverdue: 30, docNo: 'АКТ-101' },
+    { name: 'АО «СеверТранс»', amountCents: 110000000, daysOverdue: 150, docNo: 'АКТ-087' },
+    { name: 'ООО «ГринТех»', amountCents: 45000000, daysOverdue: 0, docNo: 'АКТ-120' },
+    { name: 'ИП Смирнова Е.К.', amountCents: 67000000, daysOverdue: 75, docNo: 'АКТ-095' },
+  ]);
+  
+  demoDebtsB.forEach(debt => debtStore.create(debt));
+}
+
+function createDemoDebts(orgId: string, items: { name: string; amountCents: number; daysOverdue: number | null; docNo: string }[]): DebtRecord[] {
+  const now = new Date();
+  
+  return items.map((item, i) => {
+    let dueDate: string | undefined;
+    let overdueDays: number | null;
     
-    debtStore.create({
+    if (item.daysOverdue !== null) {
+      const due = new Date(now);
+      due.setDate(due.getDate() - item.daysOverdue);
+      dueDate = due.toISOString().split('T')[0];
+      overdueDays = calculateOverdueDays(dueDate);
+    } else {
+      dueDate = undefined;
+      overdueDays = null;
+    }
+    
+    const docDate = new Date(now);
+    docDate.setDate(docDate.getDate() - (item.daysOverdue || 0) - 30);
+    
+    const category = categorizeDebt(overdueDays);
+    const documentKey = generateDocumentKey(item.name, item.docNo);
+    
+    return {
       id: generateId('debt'),
-      organizationId: org.id,
-      counterpartyName: debt.counterparty,
-      amountCents: debt.amount,
-      dueDate: dueDate.toISOString().split('T')[0],
-      createdAt: new Date().toISOString(),
-    });
+      organizationId: orgId,
+      importBatchId: 'seed-batch',
+      documentKey,
+      counterpartyName: item.name,
+      counterpartyINN: `${1000000000 + Math.floor(Math.random() * 9000000000)}`,
+      docNumber: item.docNo,
+      docDate: docDate.toISOString().split('T')[0],
+      dueDate,
+      amountCents: item.amountCents,
+      currency: 'RUB',
+      category,
+      overdueDays,
+      lastSourceUpdate: now.toISOString(),
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+    };
   });
 }

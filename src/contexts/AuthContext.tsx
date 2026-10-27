@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, Organization, AuthSession, UserRole } from '../types/models';
+import { User, Organization, AuthSession, Team } from '../types/models';
 import { userStore, orgStore, authStore, teamStore } from '../lib/store';
 import { hashPassword, verifyPassword, generateId, generateToken } from '../lib/utils';
 import { initializeDemoData } from '../lib/seed';
-import { Team } from '../types/models';
 
 interface AuthContextType {
   user: User | null;
@@ -59,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { success: false, error: 'Пользователь не найден' };
     }
     
-    if (!foundUser.isActive) {
+    if (foundUser.isActive === false) {
       return { success: false, error: 'Учётная запись деактивирована' };
     }
     
@@ -103,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       id: generateId('org'),
       name: orgName,
       timezone: 'Europe/Moscow',
+      staleDataThresholdHours: 24,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -112,9 +112,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       id: generateId('user'),
       email,
       passwordHash: hashPassword(password),
+      name: firstName,
       firstName,
       organizationId: org.id,
-      role: 'owner', // Первый пользователь становится владельцем
+      role: 'owner',
       isActive: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
