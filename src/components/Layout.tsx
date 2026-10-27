@@ -14,6 +14,8 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
 
   const navItems = [
     { id: 'dashboard', label: 'Дашборд', icon: LayoutDashboard, roles: ['owner', 'admin', 'manager', 'finance', 'employee', 'viewer'] },
+    { id: 'manager-dashboard', label: 'Кабинет руководителя', icon: LayoutDashboard, roles: ['manager'] },
+    { id: 'finance-dashboard', label: 'Финансовый кабинет', icon: LayoutDashboard, roles: ['finance'] },
     { id: 'debts', label: 'Реестр', icon: List, roles: ['owner', 'admin', 'manager', 'finance'] },
     { id: 'import', label: 'Импорт', icon: Upload, roles: ['owner', 'admin', 'finance'] },
     { id: 'tasks', label: 'Задачи', icon: CheckSquare, roles: ['owner', 'admin', 'manager'] },
@@ -22,7 +24,9 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
     { id: 'notifications', label: 'Уведомления', icon: Bell, roles: ['owner', 'admin', 'manager', 'finance', 'employee'] },
     { id: 'actions', label: 'Действия', icon: Target, roles: ['owner', 'admin', 'manager', 'finance', 'employee'] },
     { id: 'history', label: 'История', icon: History, roles: ['owner', 'admin', 'finance'] },
+    { id: 'company', label: 'Управление компанией', icon: Users, roles: ['owner', 'admin'] },
     { id: 'users', label: 'Сотрудники', icon: Users, roles: ['owner', 'admin'] },
+    { id: 'profile', label: 'Мой профиль', icon: Settings, roles: ['owner', 'admin', 'manager', 'finance', 'employee', 'viewer'] },
     { id: 'settings', label: 'Настройки', icon: Settings, roles: ['owner', 'admin'] },
   ];
 

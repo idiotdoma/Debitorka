@@ -298,3 +298,15 @@ export async function hashFile(file: File): Promise<string> {
 export function generateToken(): string {
   return generateId('token');
 }
+
+export function hashToken(token: string): string {
+  // Простое хеширование для демонстрации
+  // В production использовать bcrypt или аналог
+  let hash = 0;
+  for (let i = 0; i < token.length; i++) {
+    const char = token.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return `hashed_${Math.abs(hash).toString(36)}`;
+}

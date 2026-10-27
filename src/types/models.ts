@@ -361,7 +361,7 @@ export interface Notification {
 export interface ActivityAudit {
   id: UUID;
   organizationId: UUID;
-  entityType: 'task' | 'communication' | 'promise' | 'debt' | 'user';
+  entityType: 'task' | 'communication' | 'promise' | 'debt' | 'user' | 'team' | 'organization';
   entityId: UUID;
   action: string; // 'created' | 'updated' | 'status_changed' | 'assigned' | etc.
   changedBy: UUID;

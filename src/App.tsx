@@ -12,6 +12,10 @@ import AIAssistantPage from './pages/AIAssistantPage';
 import HistoryPage from './pages/HistoryPage';
 import SettingsPage from './pages/SettingsPage';
 import UsersPage from './pages/UsersPage';
+import ProfilePage from './pages/ProfilePage';
+import CompanyManagementPage from './pages/CompanyManagementPage';
+import ManagerDashboardPage from './pages/ManagerDashboardPage';
+import FinanceDashboardPage from './pages/FinanceDashboardPage';
 import Layout from './components/Layout';
 
 function AppContent() {
@@ -30,6 +34,22 @@ function AppContent() {
     return <LoginPage />;
   }
 
+  // Определяем стартовую страницу в зависимости от роли
+  const getDefaultPage = () => {
+    switch (user.role) {
+      case 'manager':
+        return 'manager-dashboard';
+      case 'finance':
+        return 'finance-dashboard';
+      case 'employee':
+        return 'my-tasks';
+      case 'viewer':
+        return 'dashboard';
+      default:
+        return 'dashboard';
+    }
+  };
+
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard': return <DashboardPage />;
@@ -43,6 +63,10 @@ function AppContent() {
       case 'history': return <HistoryPage />;
       case 'settings': return <SettingsPage />;
       case 'users': return <UsersPage />;
+      case 'profile': return <ProfilePage />;
+      case 'company': return <CompanyManagementPage />;
+      case 'manager-dashboard': return <ManagerDashboardPage />;
+      case 'finance-dashboard': return <FinanceDashboardPage />;
       default: return <DashboardPage />;
     }
   };

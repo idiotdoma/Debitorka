@@ -460,6 +460,13 @@ export const auditStore = {
     );
   },
   
+  getByEntityType(entityType: string, organizationId: UUID, session: AuthSession | null): ActivityAudit[] {
+    assertTenantAccess(organizationId, session);
+    return getItem<ActivityAudit>('audit').filter(a => 
+      a.entityType === entityType && a.organizationId === organizationId
+    );
+  },
+  
   create(audit: ActivityAudit): ActivityAudit {
     const audits = getItem<ActivityAudit>('audit');
     audits.push(audit);
