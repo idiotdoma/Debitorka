@@ -90,12 +90,12 @@ export default function DebtListPage({ initialFilters, onDebtClick }: DebtListPa
 
   const categoryBadge = (category: DebtCategory) => {
     const colors: Record<DebtCategory, string> = {
-      not_overdue: 'bg-green-500/20 text-green-300',
-      days_1_7: 'bg-yellow-500/20 text-yellow-300',
-      days_8_30: 'bg-orange-500/20 text-orange-300',
-      days_31_60: 'bg-red-500/20 text-red-300',
-      days_60_plus: 'bg-purple-500/20 text-purple-300',
-      no_due_date: 'bg-gray-500/20 text-gray-300',
+      not_overdue: 'bg-green-500/20 text-green-700 dark:text-green-300',
+      days_1_7: 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-300',
+      days_8_30: 'bg-orange-500/20 text-orange-700 dark:text-orange-300',
+      days_31_60: 'bg-red-500/20 text-red-700 dark:text-red-300',
+      days_60_plus: 'bg-purple-500/20 text-purple-700 dark:text-purple-300',
+      no_due_date: 'bg-gray-500/20 text-gray-700 dark:text-gray-300',
     };
     return (
       <span className={`px-2 py-0.5 rounded text-xs font-medium ${colors[category]}`}>
