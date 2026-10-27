@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LayoutDashboard, Users, Settings, LogOut, Shield, User, Briefcase, Bell } from 'lucide-react';
-import { canManageUsers, canManageTeams, canViewFinanceAnalytics } from '../lib/permissions';
+import { canViewAllDebts, canCreateTasks, canManageUsers, canViewFinanceAnalytics, canUseAI } from '../lib/permissions';
+import { LayoutDashboard, Upload, List, Target, LogOut, Shield, Users, History, Settings, CheckSquare, Bell, Sparkles } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,43 +10,31 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, currentPage, onNavigate }: LayoutProps) {
-  const { user, organization, team, logout } = useAuth();
+  const { user, organization, logout } = useAuth();
 
-  const getNavItems = () => {
-    if (!user) return [];
-    
-    const items = [
-      { id: 'dashboard', label: 'Дашборд', icon: LayoutDashboard },
-    ];
-    
-    if (canViewFinanceAnalytics(user.role)) {
-      items.push({ id: 'debts', label: 'Задолженности', icon: Briefcase });
-    }
-    
-    items.push({ id: 'my-tasks', label: 'Мои задачи', icon: User });
-    
-    if (canManageTeams(user.role)) {
-      items.push({ id: 'team', label: 'Команда', icon: Users });
-    }
-    
-    if (canManageUsers(user.role)) {
-      items.push({ id: 'users', label: 'Сотрудники', icon: Users });
-    }
-    
-    items.push({ id: 'profile', label: 'Профиль', icon: User });
-    
-    if (user.role === 'owner' || user.role === 'admin') {
-      items.push({ id: 'settings', label: 'Настройки', icon: Settings });
-    }
-    
-    return items;
-  };
+  const navItems = [
+    { id: 'dashboard', label: 'Дашборд', icon: LayoutDashboard, roles: ['owner', 'admin', 'manager', 'finance', 'employee', 'viewer'] },
+    { id: 'debts', label: 'Реестр', icon: List, roles: ['owner', 'admin', 'manager', 'finance'] },
+    { id: 'import', label: 'Импорт', icon: Upload, roles: ['owner', 'admin', 'finance'] },
+    { id: 'tasks', label: 'Задачи', icon: CheckSquare, roles: ['owner', 'admin', 'manager'] },
+    { id: 'my-tasks', label: 'Мои задачи', icon: Target, roles: ['owner', 'admin', 'manager', 'finance', 'employee'] },
+    { id: 'ai-assistant', label: 'ИИ-помощник', icon: Sparkles, roles: ['owner', 'admin', 'manager', 'finance', 'employee'] },
+    { id: 'notifications', label: 'Уведомления', icon: Bell, roles: ['owner', 'admin', 'manager', 'finance', 'employee'] },
+    { id: 'actions', label: 'Действия', icon: Target, roles: ['owner', 'admin', 'manager', 'finance', 'employee'] },
+    { id: 'history', label: 'История', icon: History, roles: ['owner', 'admin', 'finance'] },
+    { id: 'users', label: 'Сотрудники', icon: Users, roles: ['owner', 'admin'] },
+    { id: 'settings', label: 'Настройки', icon: Settings, roles: ['owner', 'admin'] },
+  ];
 
-  const navItems = getNavItems();
+  const visibleNavItems = navItems.filter(item => 
+    user && item.roles.includes(user.role)
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+      {/* Sidebar */}
       <aside className="fixed left-0 top-0 h-full w-64 bg-black/20 backdrop-blur-xl border-r border-white/10 flex flex-col z-40">
+        {/* Logo */}
         <div className="p-6 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
@@ -59,13 +47,17 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
           </div>
         </div>
 
+        {/* Organization info */}
         <div className="px-4 py-3 border-b border-white/5">
-          <div className="text-xs text-blue-200/60 truncate">{organization?.name}</div>
-          {team && <div className="text-xs text-white/40 truncate">{team.name}</div>}
+          <div className="flex items-center gap-2 text-xs">
+            <Users className="w-3.5 h-3.5 text-blue-300/50" />
+            <span className="text-blue-200/60 truncate">{organization?.name}</span>
+          </div>
         </div>
 
+        {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1">
-          {navItems.map(item => {
+          {visibleNavItems.map(item => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
             return (
@@ -85,15 +77,16 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
           })}
         </nav>
 
+        {/* User info */}
         <div className="p-4 border-t border-white/10">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-8 h-8 bg-blue-600/30 rounded-lg flex items-center justify-center">
               <span className="text-blue-300 text-xs font-medium">
-                {user?.firstName?.charAt(0) || '?'}
+                {user?.name?.charAt(0) || '?'}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white text-sm truncate">{user?.firstName} {user?.lastName}</p>
+              <p className="text-white text-sm truncate">{user?.name}</p>
               <p className="text-white/30 text-xs">{user?.role}</p>
             </div>
           </div>
@@ -107,6 +100,7 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
         </div>
       </aside>
 
+      {/* Main content */}
       <main className="ml-64 p-8">
         {children}
       </main>

@@ -3,6 +3,14 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import DebtListPage from './pages/DebtListPage';
+import ImportPage from './pages/ImportPage';
+import TasksPage from './pages/TasksPage';
+import MyTasksPage from './pages/MyTasksPage';
+import NotificationCenter from './pages/NotificationCenter';
+import ActionsPage from './pages/ActionsPage';
+import AIAssistantPage from './pages/AIAssistantPage';
+import HistoryPage from './pages/HistoryPage';
+import SettingsPage from './pages/SettingsPage';
 import UsersPage from './pages/UsersPage';
 import Layout from './components/Layout';
 
@@ -26,6 +34,14 @@ function AppContent() {
     switch (currentPage) {
       case 'dashboard': return <DashboardPage />;
       case 'debts': return <DebtListPage />;
+      case 'import': return <ImportPage />;
+      case 'tasks': return <TasksPage />;
+      case 'my-tasks': return <MyTasksPage />;
+      case 'notifications': return <NotificationCenter />;
+      case 'actions': return <ActionsPage />;
+      case 'ai-assistant': return <AIAssistantPage />;
+      case 'history': return <HistoryPage />;
+      case 'settings': return <SettingsPage />;
       case 'users': return <UsersPage />;
       default: return <DashboardPage />;
     }
