@@ -16,6 +16,11 @@ import ProfilePage from './pages/ProfilePage';
 import CompanyManagementPage from './pages/CompanyManagementPage';
 import ManagerDashboardPage from './pages/ManagerDashboardPage';
 import FinanceDashboardPage from './pages/FinanceDashboardPage';
+import FinancialAnalyticsPage from './pages/FinancialAnalyticsPage';
+import PaymentCalendarPage from './pages/PaymentCalendarPage';
+import CollectionPrioritiesPage from './pages/CollectionPrioritiesPage';
+import ReportsPage from './pages/ReportsPage';
+import DataQualityPage from './pages/DataQualityPage';
 import Layout from './components/Layout';
 
 function AppContent() {
@@ -67,6 +72,11 @@ function AppContent() {
       case 'company': return <CompanyManagementPage />;
       case 'manager-dashboard': return <ManagerDashboardPage />;
       case 'finance-dashboard': return <FinanceDashboardPage />;
+      case 'financial-analytics': return <FinancialAnalyticsPage />;
+      case 'payment-calendar': return <PaymentCalendarPage />;
+      case 'collection-priorities': return <CollectionPrioritiesPage />;
+      case 'reports': return <ReportsPage />;
+      case 'data-quality': return <DataQualityPage />;
       default: return <DashboardPage />;
     }
   };

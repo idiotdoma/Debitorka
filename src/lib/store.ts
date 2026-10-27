@@ -3,7 +3,7 @@
 // Все операции проверяют organizationId
 // ============================================================
 
-import { Organization, User, AuthSession, DebtRecord, ContactInfo, PaymentPromise, Task, Communication, Notification, ActivityAudit, ImportBatch, UUID, Team, Invitation, CounterpartyAssignment, UserPreferences } from '../types/models';
+import { Organization, User, AuthSession, DebtRecord, ContactInfo, PaymentPromise, Task, Communication, Notification, ActivityAudit, ImportBatch, UUID, Team, Invitation, CounterpartyAssignment, UserPreferences, DebtSnapshot, DataQualityIssue, SavedReportView } from '../types/models';
 import type { IntegrationConnection, SyncHistory } from '../types/integration';
 
 const STORAGE_PREFIX = 'debitor_';
@@ -713,9 +713,122 @@ export const preferencesStore = {
   },
 };
 
+// --- Snapshots (Этап 7) ---
+
+export const snapshotStore = {
+  getAll(organizationId: UUID, session: AuthSession | null): DebtSnapshot[] {
+    assertTenantAccess(organizationId, session);
+    return getItem<DebtSnapshot>('snapshots')
+      .filter(s => s.organizationId === organizationId)
+      .sort((a, b) => new Date(b.snapshotDate).getTime() - new Date(a.snapshotDate).getTime());
+  },
+  
+  getById(id: UUID, organizationId: UUID, session: AuthSession | null): DebtSnapshot | undefined {
+    assertTenantAccess(organizationId, session);
+    return getItem<DebtSnapshot>('snapshots').find(s => 
+      s.id === id && s.organizationId === organizationId
+    );
+  },
+  
+  create(snapshot: DebtSnapshot): DebtSnapshot {
+    const snapshots = getItem<DebtSnapshot>('snapshots');
+    snapshots.push(snapshot);
+    setItem('snapshots', snapshots);
+    return snapshot;
+  },
+  
+  delete(id: UUID, organizationId: UUID, session: AuthSession | null): boolean {
+    assertTenantAccess(organizationId, session);
+    const snapshots = getItem<DebtSnapshot>('snapshots');
+    const filtered = snapshots.filter(s => !(s.id === id && s.organizationId === organizationId));
+    if (filtered.length === snapshots.length) return false;
+    setItem('snapshots', filtered);
+    return true;
+  },
+};
+
+// --- Data Quality Issues (Этап 7) ---
+
+export const dataQualityStore = {
+  getAll(organizationId: UUID, session: AuthSession | null): DataQualityIssue[] {
+    assertTenantAccess(organizationId, session);
+    return getItem<DataQualityIssue>('data_quality')
+      .filter(i => i.organizationId === organizationId)
+      .sort((a, b) => new Date(b.detectedAt).getTime() - new Date(a.detectedAt).getTime());
+  },
+  
+  create(issue: DataQualityIssue): DataQualityIssue {
+    const issues = getItem<DataQualityIssue>('data_quality');
+    issues.push(issue);
+    setItem('data_quality', issues);
+    return issue;
+  },
+  
+  update(id: UUID, updateData: Partial<DataQualityIssue>, organizationId: UUID, session: AuthSession | null): DataQualityIssue | undefined {
+    assertTenantAccess(organizationId, session);
+    const issues = getItem<DataQualityIssue>('data_quality');
+    const idx = issues.findIndex(i => i.id === id && i.organizationId === organizationId);
+    if (idx === -1) return undefined;
+    issues[idx] = { ...issues[idx], ...updateData };
+    setItem('data_quality', issues);
+    return issues[idx];
+  },
+  
+  delete(id: UUID, organizationId: UUID, session: AuthSession | null): boolean {
+    assertTenantAccess(organizationId, session);
+    const issues = getItem<DataQualityIssue>('data_quality');
+    const filtered = issues.filter(i => !(i.id === id && i.organizationId === organizationId));
+    if (filtered.length === issues.length) return false;
+    setItem('data_quality', filtered);
+    return true;
+  },
+};
+
+// --- Saved Report Views (Этап 7) ---
+
+export const savedReportViewStore = {
+  getAll(organizationId: UUID, session: AuthSession | null): SavedReportView[] {
+    assertTenantAccess(organizationId, session);
+    return getItem<SavedReportView>('saved_reports')
+      .filter(r => r.organizationId === organizationId);
+  },
+  
+  getByUser(userId: UUID, organizationId: UUID, session: AuthSession | null): SavedReportView[] {
+    assertTenantAccess(organizationId, session);
+    return getItem<SavedReportView>('saved_reports')
+      .filter(r => r.organizationId === organizationId && r.userId === userId);
+  },
+  
+  create(view: SavedReportView): SavedReportView {
+    const views = getItem<SavedReportView>('saved_reports');
+    views.push(view);
+    setItem('saved_reports', views);
+    return view;
+  },
+  
+  update(id: UUID, updateData: Partial<SavedReportView>, organizationId: UUID, session: AuthSession | null): SavedReportView | undefined {
+    assertTenantAccess(organizationId, session);
+    const views = getItem<SavedReportView>('saved_reports');
+    const idx = views.findIndex(v => v.id === id && v.organizationId === organizationId);
+    if (idx === -1) return undefined;
+    views[idx] = { ...views[idx], ...updateData, updatedAt: new Date().toISOString() };
+    setItem('saved_reports', views);
+    return views[idx];
+  },
+  
+  delete(id: UUID, organizationId: UUID, session: AuthSession | null): boolean {
+    assertTenantAccess(organizationId, session);
+    const views = getItem<SavedReportView>('saved_reports');
+    const filtered = views.filter(v => !(v.id === id && v.organizationId === organizationId));
+    if (filtered.length === views.length) return false;
+    setItem('saved_reports', filtered);
+    return true;
+  },
+};
+
 // --- Reset all data (для тестов) ---
 
 export function resetAllData(): void {
-  const keys = ['organizations', 'users', 'session', 'debts', 'contacts', 'promises', 'tasks', 'communications', 'notifications', 'audit', 'imports', 'integrations', 'sync_history', 'teams', 'invitations', 'assignments', 'preferences'];
+  const keys = ['organizations', 'users', 'session', 'debts', 'contacts', 'promises', 'tasks', 'communications', 'notifications', 'audit', 'imports', 'integrations', 'sync_history', 'teams', 'invitations', 'assignments', 'preferences', 'snapshots', 'data_quality', 'saved_reports'];
   keys.forEach(key => localStorage.removeItem(getKey(key)));
 }

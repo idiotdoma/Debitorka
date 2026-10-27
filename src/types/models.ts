@@ -410,3 +410,63 @@ export interface ImportPreviewRow {
   previousAmount?: number;
   previousDueDate?: string;
 }
+
+// --- Этап 7: Исторические снимки ---
+
+export interface DebtSnapshot {
+  id: UUID;
+  organizationId: UUID;
+  snapshotDate: string;
+  importBatchId?: UUID;
+  totalDebt: number;
+  overdueDebt: number;
+  documentsCount: number;
+  overdueDocumentsCount: number;
+  data: {
+    counterpartyName: string;
+    documentNumber: string;
+    amountCents: number;
+    dueDate?: string;
+    overdueDays: number | null;
+  }[];
+}
+
+// --- Этап 7: Качество данных ---
+
+export type DataQualityIssueType = 
+  | 'missing_due_date'
+  | 'duplicate'
+  | 'missing_counterparty'
+  | 'invalid_amount'
+  | 'invalid_date'
+  | 'unknown_currency'
+  | 'outdated_data';
+
+export type DataQualitySeverity = 'error' | 'warning' | 'info';
+
+export interface DataQualityIssue {
+  id: UUID;
+  organizationId: UUID;
+  type: DataQualityIssueType;
+  severity: DataQualitySeverity;
+  debtRecordId?: UUID;
+  description: string;
+  detectedAt: string;
+  resolvedAt?: string;
+  resolvedBy?: UUID;
+  resolution?: string;
+}
+
+// --- Этап 7: Сохранённые представления отчётов ---
+
+export interface SavedReportView {
+  id: UUID;
+  organizationId: UUID;
+  userId: UUID;
+  name: string;
+  filters: Record<string, any>;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+  createdAt: string;
+  updatedAt: string;
+}
