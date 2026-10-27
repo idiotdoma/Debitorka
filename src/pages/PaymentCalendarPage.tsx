@@ -3,13 +3,16 @@ import { useAuth } from '../contexts/AuthContext';
 import { debtStore, promiseStore } from '../lib/store';
 import { getActualDebtRecord } from '../lib/debtCalculations';
 import { formatCurrency, formatDate } from '../lib/calculations';
-import { Calendar, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, AlertTriangle, CheckCircle, ChevronLeft, ChevronRight, Table } from 'lucide-react';
 
 type PeriodType = 'today' | 'week' | '2weeks' | 'month';
+type ViewMode = 'table' | 'calendar';
 
 export default function PaymentCalendarPage() {
   const { session, organization } = useAuth();
   const [period, setPeriod] = useState<PeriodType>('week');
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const data = useMemo(() => {
     if (!session || !organization) return null;
@@ -87,8 +90,86 @@ export default function PaymentCalendarPage() {
       summary,
       startDate: now,
       endDate,
+      allDebts: debts,
+      allPromises: promises,
     };
   }, [session, organization, period]);
+
+  // Генерация календарной сетки для текущего месяца
+  const calendarDays = useMemo(() => {
+    if (!data) return [];
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    // Первый день месяца
+    const firstDay = new Date(year, month, 1);
+    // Последний день месяца
+    const lastDay = new Date(year, month + 1, 0);
+    
+    // День недели первого дня (0 = воскресенье, 1 = понедельник, ...)
+    const firstDayOfWeek = firstDay.getDay();
+    // Смещение для начала недели (понедельник = 0)
+    const startOffset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+    
+    const days = [];
+    
+    // Добавляем дни предыдущего месяца
+    for (let i = startOffset - 1; i >= 0; i--) {
+      const date = new Date(year, month, -i);
+      days.push({ date, isCurrentMonth: false });
+    }
+    
+    // Добавляем дни текущего месяца
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      const date = new Date(year, month, i);
+      days.push({ date, isCurrentMonth: true });
+    }
+    
+    // Добавляем дни следующего месяца до конца недели
+    const remainingDays = 7 - (days.length % 7);
+    if (remainingDays < 7) {
+      for (let i = 1; i <= remainingDays; i++) {
+        const date = new Date(year, month + 1, i);
+        days.push({ date, isCurrentMonth: false });
+      }
+    }
+    
+    return days;
+  }, [currentDate, data]);
+
+  // Получение событий для конкретного дня
+  const getEventsForDay = (date: Date) => {
+    if (!data) return { dueDebts: [], promises: [], overdue: [] };
+
+    const dateStr = date.toISOString().split('T')[0];
+    
+    const dueDebts = data.allDebts.filter(d => d.dueDate === dateStr);
+    const promises = data.allPromises.filter(p => {
+      const promiseDate = new Date(p.promisedDate);
+      promiseDate.setHours(0, 0, 0, 0);
+      return promiseDate.toISOString().split('T')[0] === dateStr && p.status === 'expected';
+    });
+    const overdue = data.allDebts.filter(d => {
+      if (!d.dueDate) return false;
+      const dueDate = new Date(d.dueDate);
+      dueDate.setHours(0, 0, 0, 0);
+      return dueDate < date && d.overdueDays !== null && d.overdueDays > 0;
+    });
+
+    return { dueDebts, promises, overdue };
+  };
+
+  // Навигация по месяцам
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    const newDate = new Date(currentDate);
+    if (direction === 'prev') {
+      newDate.setMonth(newDate.getMonth() - 1);
+    } else {
+      newDate.setMonth(newDate.getMonth() + 1);
+    }
+    setCurrentDate(newDate);
+  };
 
   if (!data) {
     return (
@@ -100,9 +181,31 @@ export default function PaymentCalendarPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Платёжный календарь</h1>
-        <p className="text-blue-200/60 mt-1">Планирование поступлений и контроль сроков</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Платёжный календарь</h1>
+          <p className="text-blue-200/60 mt-1">Планирование поступлений и контроль сроков</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setViewMode('table')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition ${
+              viewMode === 'table' ? 'bg-blue-600 text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'
+            }`}
+          >
+            <Table className="w-4 h-4" />
+            Таблица
+          </button>
+          <button
+            onClick={() => setViewMode('calendar')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition ${
+              viewMode === 'calendar' ? 'bg-blue-600 text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'
+            }`}
+          >
+            <Calendar className="w-4 h-4" />
+            Календарь
+          </button>
+        </div>
       </div>
 
       {/* Переключатель периода */}
@@ -192,6 +295,7 @@ export default function PaymentCalendarPage() {
       </div>
 
       {/* Табличный режим */}
+      {viewMode === 'table' && (
       <div className="space-y-6">
           {/* Документы со сроком в периоде */}
           <div className="bg-white/5 backdrop-blur rounded-2xl border border-white/10 p-6">
@@ -291,6 +395,118 @@ export default function PaymentCalendarPage() {
             </div>
           )}
         </div>
+      )}
+
+      {/* Календарный режим */}
+      {viewMode === 'calendar' && (
+        <div className="bg-white/5 backdrop-blur rounded-2xl border border-white/10 p-6">
+          {/* Навигация по месяцам */}
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => navigateMonth('prev')}
+              className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition"
+            >
+              <ChevronLeft className="w-5 h-5 text-white" />
+            </button>
+            <h2 className="text-lg font-semibold text-white">
+              {currentDate.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
+            </h2>
+            <button
+              onClick={() => navigateMonth('next')}
+              className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition"
+            >
+              <ChevronRight className="w-5 h-5 text-white" />
+            </button>
+          </div>
+
+          {/* Дни недели */}
+          <div className="grid grid-cols-7 gap-2 mb-2">
+            {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(day => (
+              <div key={day} className="text-center text-xs font-medium text-white/60 py-2">
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* Календарная сетка */}
+          <div className="grid grid-cols-7 gap-2">
+            {calendarDays.map((day, idx) => {
+              const events = getEventsForDay(day.date);
+              const isToday = day.date.toDateString() === new Date().toDateString();
+              const hasEvents = events.dueDebts.length > 0 || events.promises.length > 0;
+              
+              return (
+                <div
+                  key={idx}
+                  className={`min-h-[100px] p-2 rounded-lg border transition ${
+                    day.isCurrentMonth
+                      ? 'bg-white/5 border-white/10'
+                      : 'bg-white/[0.02] border-white/5'
+                  } ${isToday ? 'ring-2 ring-blue-500' : ''}`}
+                >
+                  <div className={`text-xs font-medium mb-1 ${
+                    day.isCurrentMonth ? 'text-white' : 'text-white/40'
+                  }`}>
+                    {day.date.getDate()}
+                  </div>
+                  
+                  {hasEvents && (
+                    <div className="space-y-1">
+                      {/* Срок оплаты */}
+                      {events.dueDebts.slice(0, 2).map(debt => (
+                        <div
+                          key={debt.id}
+                          className="text-xs bg-blue-500/20 text-blue-300 rounded px-1 py-0.5 truncate"
+                          title={`${debt.counterpartyName}: ${formatCurrency(debt.amountCents)}`}
+                        >
+                          {debt.counterpartyName.substring(0, 15)}...
+                        </div>
+                      ))}
+                      {events.dueDebts.length > 2 && (
+                        <div className="text-xs text-white/40">
+                          +{events.dueDebts.length - 2} ещё
+                        </div>
+                      )}
+                      
+                      {/* Обещания оплаты */}
+                      {events.promises.slice(0, 2).map(promise => (
+                        <div
+                          key={promise.id}
+                          className="text-xs bg-green-500/20 text-green-300 rounded px-1 py-0.5 truncate"
+                          title={`${promise.counterpartyName}: ${formatCurrency(promise.promisedAmountCents)}`}
+                        >
+                          💰 {promise.counterpartyName.substring(0, 12)}...
+                        </div>
+                      ))}
+                      {events.promises.length > 2 && (
+                        <div className="text-xs text-white/40">
+                          +{events.promises.length - 2} ещё
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Легенда календаря */}
+          <div className="mt-6 flex gap-4 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-blue-500/20 border border-blue-500/30 rounded"></div>
+              <span className="text-white/60">Срок оплаты</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-500/20 border border-green-500/30 rounded"></div>
+              <span className="text-white/60">Обещание оплаты</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 ring-2 ring-blue-500 rounded"></div>
+              <span className="text-white/60">Сегодня</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

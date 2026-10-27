@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { debtStore, importStore, savedReportViewStore } from '../lib/store';
+import { debtStore, importStore, savedReportViewStore, promiseStore } from '../lib/store';
 import { getActualDebtRecord, filterValidDebts } from '../lib/debtCalculations';
 import { formatCurrency, formatDate, generateId } from '../lib/calculations';
 import { DEBT_CATEGORIES } from '../lib/constants';
-import { DebtCategory, DebtRecord, SavedReportView } from '../types/models';
+import { DebtCategory, DebtRecord, SavedReportView, PromiseStatus } from '../types/models';
 import { FileText, Download, Filter, Save, Trash2, FolderOpen } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
-type ReportType = 'registry' | 'overdue' | 'aging' | 'top_debtors' | 'no_due_date' | 'promises_check';
+type ReportType = 'registry' | 'overdue' | 'aging' | 'top_debtors' | 'no_due_date' | 'promises_check' | 'promises';
 
 export default function ReportsPage() {
   const { session, organization, user } = useAuth();
@@ -27,12 +27,13 @@ export default function ReportsPage() {
       top_debtors: 'Крупнейшие должники',
       no_due_date: 'Задолженность без срока оплаты',
       promises_check: 'Обещания оплаты, требующие проверки',
+      promises: 'Все обещания оплаты',
     };
     return titles[type];
   };
 
   const reportData = useMemo(() => {
-    if (!session || !organization) return { data: [], title: '', columns: [] };
+    if (!session || !organization) return { data: [] as any[], title: '', columns: [] as { key: string; label: string }[] };
 
     const allDebts = debtStore.getAll(organization.id, session);
     
@@ -61,6 +62,34 @@ export default function ReportsPage() {
       case 'top_debtors':
         debts = debts.sort((a, b) => b.amountCents - a.amountCents).slice(0, 20);
         break;
+      case 'promises': {
+        // Отчёт по обещаниям оплаты
+        const allPromises = promiseStore.getAll(organization.id, session);
+        const promisesData = allPromises.map(p => ({
+          counterpartyName: p.counterpartyName,
+          contactName: p.contactName,
+          promisedDate: formatDate(p.promisedDate),
+          promisedAmountCents: p.promisedAmountCents,
+          status: p.status,
+          source: p.source,
+          comment: p.comment || '',
+        }));
+        
+        const title = getReportTitle(reportType);
+        return {
+           promisesData,
+          title,
+          columns: [
+            { key: 'counterpartyName', label: 'Контрагент' },
+            { key: 'contactName', label: 'Контакт' },
+            { key: 'promisedDate', label: 'Обещанная дата' },
+            { key: 'promisedAmountCents', label: 'Сумма' },
+            { key: 'status', label: 'Статус' },
+            { key: 'source', label: 'Источник' },
+            { key: 'comment', label: 'Комментарий' },
+          ]
+        };
+      }
       case 'aging':
         // Для возрастной структуры создаём агрегированные данные по категориям
         const agingData = Object.entries(DEBT_CATEGORIES).map(([key, config]) => {
@@ -147,7 +176,7 @@ export default function ReportsPage() {
   };
 
   const exportToCSV = () => {
-    if (!reportData.data.length) return;
+    if (!reportData.data || reportData.data.length === 0) return;
 
     const headers = reportData.columns.map(c => c.label);
     const rows = reportData.data.map((debt: any) => 
@@ -198,7 +227,7 @@ export default function ReportsPage() {
   };
 
   const exportToXLSX = () => {
-    if (!reportData.data.length) return;
+    if (!reportData.data || reportData.data.length === 0) return;
 
     const wsData = [
       reportData.columns.map(c => c.label),
@@ -272,6 +301,14 @@ export default function ReportsPage() {
           >
             Без срока оплаты
           </button>
+          <button
+            onClick={() => setReportType('promises')}
+            className={`px-4 py-2 rounded-lg text-sm transition ${
+              reportType === 'promises' ? 'bg-blue-600 text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'
+            }`}
+          >
+            Обещания оплаты
+          </button>
         </div>
       </div>
 
@@ -312,7 +349,7 @@ export default function ReportsPage() {
       <div className="flex gap-3 flex-wrap">
         <button
           onClick={exportToCSV}
-          disabled={!reportData.data.length}
+          disabled={!reportData.data || reportData.data.length === 0}
           className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-500 disabled:bg-green-800 disabled:cursor-not-allowed text-white rounded-lg text-sm transition"
         >
           <Download className="w-4 h-4" />
@@ -320,7 +357,7 @@ export default function ReportsPage() {
         </button>
         <button
           onClick={exportToXLSX}
-          disabled={!reportData.data.length}
+          disabled={!reportData.data || reportData.data.length === 0}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:cursor-not-allowed text-white rounded-lg text-sm transition"
         >
           <Download className="w-4 h-4" />
@@ -350,7 +387,7 @@ export default function ReportsPage() {
           <strong>Отчёт:</strong> {reportData.title}
         </p>
         <p className="text-blue-200/70 text-xs mt-1">
-          Записей: {reportData.data.length} • Дата формирования: {formatDate(new Date().toISOString())}
+          Записей: {reportData.data?.length || 0} • Дата формирования: {formatDate(new Date().toISOString())}
         </p>
       </div>
 
@@ -368,7 +405,7 @@ export default function ReportsPage() {
               </tr>
             </thead>
             <tbody>
-              {reportData.data.length === 0 ? (
+              {!reportData.data || reportData.data.length === 0 ? (
                 <tr>
                   <td colSpan={reportData.columns.length} className="px-4 py-12 text-center text-white/40">
                     Нет данных для отображения
