@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Настройка dark mode через класс для Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* CSS Variables for theming - Light theme by default */
 :root {
   --bg-primary: #ffffff;

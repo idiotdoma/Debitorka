@@ -15,17 +15,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return (saved as Theme) || 'light';
   });
 
-  // Применяем тему сразу при монтировании
+  // Применяем тему при изменении и при первой загрузке
   useEffect(() => {
     localStorage.setItem('theme', theme);
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(theme);
   }, [theme]);
-
-  // Устанавливаем тему при первой загрузке
-  useEffect(() => {
-    document.documentElement.classList.add(theme);
-  }, []);
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
