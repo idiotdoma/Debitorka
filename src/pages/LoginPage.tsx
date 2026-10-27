@@ -161,6 +161,11 @@ export default function LoginPage() {
                 <p className="text-white/40">пароль: manager123</p>
               </div>
               <div className="bg-white/5 rounded-lg p-2">
+                <p className="text-green-300 font-medium">Финансист (Орг. А)</p>
+                <p className="text-white/60">finance@alfa.ru</p>
+                <p className="text-white/40">пароль: finance123</p>
+              </div>
+              <div className="bg-white/5 rounded-lg p-2">
                 <p className="text-yellow-300 font-medium">Сотрудник (Орг. А)</p>
                 <p className="text-white/60">employee@alfa.ru</p>
                 <p className="text-white/40">пароль: employee123</p>
