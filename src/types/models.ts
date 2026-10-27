@@ -423,9 +423,11 @@ export interface DebtSnapshot {
   documentsCount: number;
   overdueDocumentsCount: number;
   data: {
+    documentKey: string; // Устойчивый ключ для сравнения
     counterpartyName: string;
     documentNumber: string;
     amountCents: number;
+    currency: string;
     dueDate?: string;
     overdueDays: number | null;
   }[];

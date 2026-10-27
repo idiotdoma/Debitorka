@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { debtStore, importStore } from '../lib/store';
+import { getActualDebtRecord, filterValidDebts } from '../lib/debtCalculations';
 import { formatCurrency, formatDate } from '../lib/calculations';
 import { DEBT_CATEGORIES } from '../lib/constants';
 import { DebtCategory, DebtRecord } from '../types/models';
@@ -30,7 +31,11 @@ export default function ReportsPage() {
   const reportData = useMemo(() => {
     if (!session || !organization) return { data: [], title: '', columns: [] };
 
-    let debts = debtStore.getAll(organization.id, session);
+    const allDebts = debtStore.getAll(organization.id, session);
+    
+    // Фильтруем некорректные данные и пересчитываем просрочку
+    const { validDebts } = filterValidDebts(allDebts);
+    let debts = validDebts.map(getActualDebtRecord);
 
     // Применение фильтров
     if (categoryFilter !== 'all') {
@@ -53,6 +58,31 @@ export default function ReportsPage() {
       case 'top_debtors':
         debts = debts.sort((a, b) => b.amountCents - a.amountCents).slice(0, 20);
         break;
+      case 'aging':
+        // Для возрастной структуры создаём агрегированные данные по категориям
+        const agingData = Object.entries(DEBT_CATEGORIES).map(([key, config]) => {
+          const categoryDebts = debts.filter(d => d.category === key);
+          const totalAmount = categoryDebts.reduce((sum, d) => sum + d.amountCents, 0);
+          return {
+            category: key,
+            categoryName: config.label,
+            documentsCount: categoryDebts.length,
+            totalAmount,
+            percentage: debts.length > 0 ? (categoryDebts.length / debts.length * 100).toFixed(1) : '0',
+          };
+        }).filter(d => d.documentsCount > 0);
+        
+        const title = getReportTitle(reportType);
+        return { 
+          data: agingData, 
+          title, 
+          columns: [
+            { key: 'categoryName', label: 'Категория' },
+            { key: 'documentsCount', label: 'Количество документов' },
+            { key: 'totalAmount', label: 'Общая сумма' },
+            { key: 'percentage', label: 'Доля (%)' },
+          ]
+        };
     }
 
     const columns = [
@@ -77,18 +107,33 @@ export default function ReportsPage() {
     const rows = reportData.data.map((debt: any) => 
       reportData.columns.map(col => {
         let value = debt[col.key];
-        if (col.key === 'amountCents') {
+        
+        // Форматирование значений
+        if (col.key === 'amountCents' || col.key === 'totalAmount') {
           value = (value / 100).toFixed(2);
         } else if (col.key === 'category') {
           value = DEBT_CATEGORIES[value as DebtCategory]?.label || value;
         } else if (col.key === 'docDate' || col.key === 'dueDate') {
           value = value ? formatDate(value) : '';
+        } else if (col.key === 'percentage') {
+          value = value + '%';
         }
-        // Защита от формульных инъекций
-        if (typeof value === 'string' && (value.startsWith('=') || value.startsWith('+') || value.startsWith('-') || value.startsWith('@'))) {
-          value = `'${value}`;
+        
+        // Преобразование в строку
+        let strValue = String(value ?? '');
+        
+        // Защита от формульных инъекций (CSV Formula Injection)
+        // Проверяем начало строки с учётом возможных пробелов и управляющих символов
+        const trimmed = strValue.trimStart();
+        if (trimmed.startsWith('=') || trimmed.startsWith('+') || trimmed.startsWith('-') || 
+            trimmed.startsWith('@') || trimmed.startsWith('\t') || trimmed.startsWith('\r')) {
+          strValue = "'" + strValue;
         }
-        return value ?? '';
+        
+        // Экранирование двойных кавычек (удваиваем их)
+        strValue = strValue.replace(/"/g, '""');
+        
+        return strValue;
       })
     );
 

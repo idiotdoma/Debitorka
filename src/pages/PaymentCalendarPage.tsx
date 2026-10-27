@@ -1,20 +1,24 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { debtStore, promiseStore } from '../lib/store';
+import { getActualDebtRecord } from '../lib/debtCalculations';
 import { formatCurrency, formatDate } from '../lib/calculations';
 import { Calendar, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
 
-type PeriodType = 'today' | 'week' | '2weeks' | 'month' | 'custom';
+type PeriodType = 'today' | 'week' | '2weeks' | 'month';
 
 export default function PaymentCalendarPage() {
   const { session, organization } = useAuth();
   const [period, setPeriod] = useState<PeriodType>('week');
-  const [viewMode, setViewMode] = useState<'calendar' | 'table'>('table');
 
   const data = useMemo(() => {
     if (!session || !organization) return null;
 
-    const debts = debtStore.getAll(organization.id, session);
+    const allDebts = debtStore.getAll(organization.id, session);
+    
+    // Пересчитываем просрочку для всех записей
+    const debts = allDebts.map(getActualDebtRecord);
+    
     const promises = promiseStore.getAll(organization.id, session);
 
     const now = new Date();
@@ -43,7 +47,7 @@ export default function PaymentCalendarPage() {
       return dueDate >= now && dueDate <= endDate;
     });
 
-    // Просроченные документы
+    // Просроченные документы (с актуальной просрочкой)
     const overdue = debts.filter(d => d.overdueDays !== null && d.overdueDays > 0);
 
     // Обещания оплаты в периоде
@@ -96,29 +100,9 @@ export default function PaymentCalendarPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Платёжный календарь</h1>
-          <p className="text-blue-200/60 mt-1">Планирование поступлений и контроль сроков</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setViewMode('table')}
-            className={`px-4 py-2 rounded-lg text-sm transition ${
-              viewMode === 'table' ? 'bg-blue-600 text-white' : 'bg-white/5 text-white/60'
-            }`}
-          >
-            Таблица
-          </button>
-          <button
-            onClick={() => setViewMode('calendar')}
-            className={`px-4 py-2 rounded-lg text-sm transition ${
-              viewMode === 'calendar' ? 'bg-blue-600 text-white' : 'bg-white/5 text-white/60'
-            }`}
-          >
-            Календарь
-          </button>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-white">Платёжный календарь</h1>
+        <p className="text-blue-200/60 mt-1">Планирование поступлений и контроль сроков</p>
       </div>
 
       {/* Переключатель периода */}
@@ -208,8 +192,7 @@ export default function PaymentCalendarPage() {
       </div>
 
       {/* Табличный режим */}
-      {viewMode === 'table' && (
-        <div className="space-y-6">
+      <div className="space-y-6">
           {/* Документы со сроком в периоде */}
           <div className="bg-white/5 backdrop-blur rounded-2xl border border-white/10 p-6">
             <h2 className="text-lg font-semibold text-white mb-4">
@@ -308,16 +291,6 @@ export default function PaymentCalendarPage() {
             </div>
           )}
         </div>
-      )}
-
-      {/* Календарный режим (заглушка) */}
-      {viewMode === 'calendar' && (
-        <div className="bg-white/5 backdrop-blur rounded-2xl border border-white/10 p-12 text-center">
-          <Calendar className="w-12 h-12 text-white/20 mx-auto mb-4" />
-          <p className="text-white/40">Календарный режим находится в разработке</p>
-          <p className="text-white/30 text-sm mt-2">Используйте табличный режим для просмотра событий</p>
-        </div>
-      )}
     </div>
   );
 }

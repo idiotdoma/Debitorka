@@ -6,6 +6,7 @@ import {
   calculateCategoryDistribution, 
   calculateCounterpartyRating 
 } from '../lib/financialAnalytics';
+import { prepareDebtsForAnalytics } from '../lib/debtCalculations';
 import { formatCurrency, formatDate } from '../lib/calculations';
 import { DEBT_CATEGORIES } from '../lib/constants';
 import { DebtCategory } from '../types/models';
@@ -20,9 +21,13 @@ export default function FinancialAnalyticsPage() {
   const data = useMemo(() => {
     if (!session || !organization) return null;
 
-    let debts = debtStore.getAll(organization.id, session);
+    const allDebts = debtStore.getAll(organization.id, session);
+    
+    // Пересчитываем просрочку и фильтруем некорректные данные
+    const { actualDebts, unsupportedCurrencyDebts, negativeDebts } = prepareDebtsForAnalytics(allDebts);
 
     // Применение фильтров
+    let debts = actualDebts;
     if (categoryFilter !== 'all') {
       debts = debts.filter(d => d.category === categoryFilter);
     }
@@ -47,6 +52,8 @@ export default function FinancialAnalyticsPage() {
       categoryDistribution,
       counterpartyRating,
       debtsCount: debts.length,
+      unsupportedCurrencyCount: unsupportedCurrencyDebts.length,
+      negativeCount: negativeDebts.length,
     };
   }, [session, organization, categoryFilter, counterpartyFilter, ratingSortBy]);
 
@@ -161,6 +168,26 @@ export default function FinancialAnalyticsPage() {
         <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
           <p className="text-blue-200 text-sm">
             <strong>Последнее обновление данных:</strong> {formatDate(metrics.lastUpdateDate)}
+          </p>
+        </div>
+      )}
+
+      {/* Предупреждения о проблемах с данными */}
+      {(data.unsupportedCurrencyCount > 0 || data.negativeCount > 0) && (
+        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+          <p className="text-yellow-200 text-sm mb-2">
+            <strong>⚠️ Внимание:</strong> Обнаружены проблемы с данными, которые исключены из расчётов:
+          </p>
+          <ul className="text-yellow-200/80 text-xs space-y-1">
+            {data.unsupportedCurrencyCount > 0 && (
+              <li>• {data.unsupportedCurrencyCount} документов с неподдерживаемой валютой</li>
+            )}
+            {data.negativeCount > 0 && (
+              <li>• {data.negativeCount} документов с отрицательной суммой (кредитовые остатки)</li>
+            )}
+          </ul>
+          <p className="text-yellow-200/60 text-xs mt-2">
+            Проверьте страницу "Качество данных" для получения подробной информации.
           </p>
         </div>
       )}

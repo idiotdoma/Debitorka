@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { debtStore } from '../lib/store';
 import { calculateCollectionPriorities } from '../lib/financialAnalytics';
+import { getActualDebtRecord } from '../lib/debtCalculations';
 import { formatCurrency, formatDate } from '../lib/calculations';
 import { AlertTriangle, TrendingUp, Clock, CheckCircle } from 'lucide-react';
 
@@ -10,7 +11,9 @@ export default function CollectionPrioritiesPage() {
 
   const priorities = useMemo(() => {
     if (!session || !organization) return [];
-    const debts = debtStore.getAll(organization.id, session);
+    const allDebts = debtStore.getAll(organization.id, session);
+    // Пересчитываем просрочку для всех записей
+    const debts = allDebts.map(getActualDebtRecord);
     return calculateCollectionPriorities(debts);
   }, [session, organization]);
 

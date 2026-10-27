@@ -7,7 +7,8 @@ import * as XLSX from 'xlsx';
 import { ImportPreviewRow, ImportError, DebtRecord, ImportBatch, UUID, ImportChangeType } from '../types/models';
 import { FIELD_ALIASES, REQUIRED_IMPORT_FIELDS, DEFAULT_CURRENCY, SUPPORTED_CURRENCIES, MAX_FILE_SIZE_BYTES } from './constants';
 import { parseDate, parseAmountToCents, calculateOverdueDays, categorizeDebt, generateId, generateDocumentKey, hashFile } from './calculations';
-import { debtStore, importStore } from './store';
+import { debtStore, importStore, snapshotStore } from './store';
+import { createDebtSnapshot } from './financialAnalytics';
 import type { AuthSession } from '../types/models';
 
 function normalizeFieldName(header: string): string | null {
@@ -381,6 +382,17 @@ export function executeImport(
   };
   
   importStore.create(batch);
+  
+  // Создаём снимок задолженности только при успешном импорте
+  if (batch.status === 'completed' && validRows.length > 0) {
+    try {
+      const snapshot = createDebtSnapshot(organizationId, batchId);
+      snapshotStore.create(snapshot);
+    } catch (error) {
+      // Не прерываем импорт из-за ошибки создания снимка
+      console.error('Failed to create debt snapshot:', error);
+    }
+  }
   
   return batch;
 }

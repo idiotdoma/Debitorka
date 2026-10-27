@@ -6,6 +6,7 @@
 import { DebtRecord, DebtSnapshot, UUID, AuthSession } from '../types/models';
 import { debtStore } from './store';
 import { DEBT_CATEGORIES } from './constants';
+import { recalculateOverdueDays } from './debtCalculations';
 
 // --- Основные финансовые показатели ---
 
@@ -209,10 +210,16 @@ export function calculateCollectionPriorities(debts: DebtRecord[]): CollectionPr
     }
     
     // Фактор 4: Устаревшие данные (10 баллов)
+    // Отсутствие lastSourceUpdate означает, что актуальность не подтверждена
     const daysSinceUpdate = debt.lastSourceUpdate
       ? Math.floor((Date.now() - new Date(debt.lastSourceUpdate).getTime()) / (1000 * 60 * 60 * 24))
-      : 0;
-    if (daysSinceUpdate > 7) {
+      : null;
+    
+    if (daysSinceUpdate === null) {
+      // Нет данных о последнем обновлении - требуется уточнение
+      score += 15;
+      reasons.push('Актуальность данных не подтверждена');
+    } else if (daysSinceUpdate > 7) {
       score += 10;
       reasons.push('Данные устарели (>7 дней)');
     }
@@ -237,8 +244,10 @@ export function calculateCollectionPriorities(debts: DebtRecord[]): CollectionPr
       recommendedAction = 'Срочно связаться с контрагентом, рассмотреть претензию';
     } else if (debt.overdueDays !== null && debt.overdueDays > 30) {
       recommendedAction = 'Отправить напоминание об оплате';
+    } else if (daysSinceUpdate === null) {
+      recommendedAction = 'Проверить актуальность данных из источника';
     } else if (daysSinceUpdate > 7) {
-      recommendedAction = 'Проверить актуальность данных';
+      recommendedAction = 'Обновить данные из источника';
     } else {
       recommendedAction = 'Продолжать мониторинг';
     }
@@ -271,10 +280,21 @@ export function createDebtSnapshot(
     expiresAt: new Date(Date.now() + 86400000).toISOString(),
   };
   
-  const debts = debtStore.getAll(organizationId, session);
+  const allDebts = debtStore.getAll(organizationId, session);
   
-  const totalDebt = debts.reduce((sum, d) => sum + (d.amountCents || 0), 0);
-  const overdueDebts = debts.filter(d => d.overdueDays !== null && d.overdueDays > 0);
+  // Фильтруем только валидные данные (RUB, положительные суммы)
+  const debts = allDebts.filter(d => 
+    (!d.currency || d.currency === 'RUB') && d.amountCents >= 0
+  );
+  
+  // Пересчитываем просрочку на текущую дату
+  const actualDebts = debts.map(d => {
+    const overdueDays = d.dueDate ? recalculateOverdueDays(d.dueDate) : null;
+    return { ...d, overdueDays };
+  });
+  
+  const totalDebt = actualDebts.reduce((sum, d) => sum + (d.amountCents || 0), 0);
+  const overdueDebts = actualDebts.filter(d => d.overdueDays !== null && d.overdueDays > 0);
   const overdueDebt = overdueDebts.reduce((sum, d) => sum + (d.amountCents || 0), 0);
   
   return {
@@ -284,12 +304,14 @@ export function createDebtSnapshot(
     importBatchId,
     totalDebt,
     overdueDebt,
-    documentsCount: debts.length,
+    documentsCount: actualDebts.length,
     overdueDocumentsCount: overdueDebts.length,
-    data: debts.map(d => ({
+    data: actualDebts.map(d => ({
+      documentKey: d.documentKey, // Устойчивый ключ для сравнения
       counterpartyName: d.counterpartyName,
       documentNumber: d.docNumber,
       amountCents: d.amountCents,
+      currency: d.currency || 'RUB',
       dueDate: d.dueDate,
       overdueDays: d.overdueDays,
     })),
@@ -314,20 +336,17 @@ export function compareSnapshots(snapshot1: DebtSnapshot, snapshot2: DebtSnapsho
   const overdueDebtChange = snapshot2.overdueDebt - snapshot1.overdueDebt;
   const documentsCountChange = snapshot2.documentsCount - snapshot1.documentsCount;
   
-  // Создание ключей для сравнения
-  const createKey = (d: { counterpartyName: string; documentNumber: string }) => 
-    `${d.counterpartyName}|${d.documentNumber}`;
+  // Использование устойчивого ключа documentKey для сравнения
+  const keys1 = new Set(snapshot1.data.map(d => d.documentKey));
+  const keys2 = new Set(snapshot2.data.map(d => d.documentKey));
   
-  const keys1 = new Set(snapshot1.data.map(createKey));
-  const keys2 = new Set(snapshot2.data.map(createKey));
-  
-  const newDocuments = snapshot2.data.filter(d => !keys1.has(createKey(d))).length;
-  const removedDocuments = snapshot1.data.filter(d => !keys2.has(createKey(d))).length;
+  const newDocuments = snapshot2.data.filter(d => !keys1.has(d.documentKey)).length;
+  const removedDocuments = snapshot1.data.filter(d => !keys2.has(d.documentKey)).length;
   
   // Подсчёт изменённых документов
   let changedDocuments = 0;
   snapshot1.data.forEach(d1 => {
-    const d2 = snapshot2.data.find(d => createKey(d) === createKey(d1));
+    const d2 = snapshot2.data.find(d => d.documentKey === d1.documentKey);
     if (d2 && (d1.amountCents !== d2.amountCents || d1.dueDate !== d2.dueDate)) {
       changedDocuments++;
     }
