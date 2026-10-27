@@ -24,11 +24,11 @@ export default function CollectionPrioritiesPage() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return 'bg-red-500/20 text-red-300 border-red-500/30';
-      case 'high': return 'bg-orange-500/20 text-orange-300 border-orange-500/30';
-      case 'normal': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
-      case 'needs_review': return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
-      default: return 'bg-white/5 text-white/60 border-white/10';
+      case 'critical': return 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800';
+      case 'high': return 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800';
+      case 'normal': return 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800';
+      case 'needs_review': return 'bg-gray-50 dark:bg-gray-900/20 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800';
+      default: return 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-slate-700';
     }
   };
 
@@ -51,33 +51,33 @@ export default function CollectionPrioritiesPage() {
 
       {/* Статистика приоритетов */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+        <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="w-5 h-5 text-red-400" />
-            <span className="text-sm text-red-300">Критический</span>
+            <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+            <span className="text-sm text-red-700 dark:text-red-300">Критический</span>
           </div>
-          <p className="text-2xl font-bold text-white">{criticalCount}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{criticalCount}</p>
         </div>
-        <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
+        <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5 text-orange-400" />
-            <span className="text-sm text-orange-300">Высокий</span>
+            <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+            <span className="text-sm text-orange-700 dark:text-orange-300">Высокий</span>
           </div>
-          <p className="text-2xl font-bold text-white">{highCount}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{highCount}</p>
         </div>
-        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+        <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Clock className="w-5 h-5 text-yellow-400" />
-            <span className="text-sm text-yellow-300">Обычный</span>
+            <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+            <span className="text-sm text-yellow-700 dark:text-yellow-300">Обычный</span>
           </div>
-          <p className="text-2xl font-bold text-white">{normalCount}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{normalCount}</p>
         </div>
-        <div className="bg-gray-500/10 border border-gray-500/20 rounded-lg p-4">
+        <div className="bg-gray-50 dark:bg-gray-900/10 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
-            <CheckCircle className="w-5 h-5 text-gray-400" />
-            <span className="text-sm text-gray-300">Требует уточнения</span>
+            <CheckCircle className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            <span className="text-sm text-gray-700 dark:text-gray-300">Требует уточнения</span>
           </div>
-          <p className="text-2xl font-bold text-white">{reviewCount}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{reviewCount}</p>
         </div>
       </div>
 

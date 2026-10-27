@@ -162,7 +162,7 @@ export default function ImportPage() {
           <React.Fragment key={s}>
             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${
               step === s ? 'bg-blue-600 text-white' :
-              (['upload', 'mapping', 'preview', 'result'].indexOf(step) > i) ? 'bg-green-600/20 text-green-300' :
+              (['upload', 'mapping', 'preview', 'result'].indexOf(step) > i) ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' :
               'bg-white/5 text-white/30'
             }`}>
               {i + 1}. {s === 'upload' ? 'Загрузка' : s === 'mapping' ? 'Соответствие' : s === 'preview' ? 'Предпросмотр' : 'Результат'}

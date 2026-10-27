@@ -42,7 +42,7 @@ export default function HistoryPage() {
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-lg ${
-                    batch.status === 'completed' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'
+                    batch.status === 'completed' ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
                   }`}>
                     {batch.status === 'completed' ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
                   </div>
@@ -54,28 +54,28 @@ export default function HistoryPage() {
                   </div>
                 </div>
                 <span className={`px-2 py-1 rounded text-xs font-medium ${
-                  batch.status === 'completed' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'
+                  batch.status === 'completed' ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
                 }`}>
                   {batch.status === 'completed' ? 'Успешно' : 'Ошибка'}
                 </span>
               </div>
 
               <div className="grid grid-cols-4 gap-3 mb-3">
-                <div className="bg-white/5 rounded-lg p-3 text-center">
-                  <p className="text-lg font-bold text-white">{batch.rowCount}</p>
-                  <p className="text-xs text-white/40">Строк</p>
+                <div className="bg-white dark:bg-slate-800 rounded-lg p-3 text-center border border-gray-200 dark:border-slate-700">
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">{batch.rowCount}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Строк</p>
                 </div>
-                <div className="bg-green-500/10 rounded-lg p-3 text-center border border-green-500/20">
-                  <p className="text-lg font-bold text-green-300">{batch.successCount}</p>
-                  <p className="text-xs text-green-300/60">Импортировано</p>
+                <div className="bg-green-50 dark:bg-green-900/10 rounded-lg p-3 text-center border border-green-200 dark:border-green-800">
+                  <p className="text-lg font-bold text-green-700 dark:text-green-300">{batch.successCount}</p>
+                  <p className="text-xs text-green-600 dark:text-green-400">Импортировано</p>
                 </div>
-                <div className="bg-red-500/10 rounded-lg p-3 text-center border border-red-500/20">
-                  <p className="text-lg font-bold text-red-300">{batch.errorCount}</p>
-                  <p className="text-xs text-red-300/60">Ошибок</p>
+                <div className="bg-red-50 dark:bg-red-900/10 rounded-lg p-3 text-center border border-red-200 dark:border-red-800">
+                  <p className="text-lg font-bold text-red-700 dark:text-red-300">{batch.errorCount}</p>
+                  <p className="text-xs text-red-600 dark:text-red-400">Ошибок</p>
                 </div>
-                <div className="bg-yellow-500/10 rounded-lg p-3 text-center border border-yellow-500/20">
-                  <p className="text-lg font-bold text-yellow-300">{batch.duplicateCount}</p>
-                  <p className="text-xs text-yellow-300/60">Дубликатов</p>
+                <div className="bg-yellow-50 dark:bg-yellow-900/10 rounded-lg p-3 text-center border border-yellow-200 dark:border-yellow-800">
+                  <p className="text-lg font-bold text-yellow-700 dark:text-yellow-300">{batch.duplicateCount}</p>
+                  <p className="text-xs text-yellow-600 dark:text-yellow-400">Дубликатов</p>
                 </div>
               </div>
 

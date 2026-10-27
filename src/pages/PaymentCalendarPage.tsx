@@ -456,14 +456,14 @@ export default function PaymentCalendarPage() {
                       {events.dueDebts.slice(0, 2).map(debt => (
                         <div
                           key={debt.id}
-                          className="text-xs bg-blue-500/20 text-blue-300 rounded px-1 py-0.5 truncate"
+                          className="text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded px-1 py-0.5 truncate border border-blue-200 dark:border-blue-800"
                           title={`${debt.counterpartyName}: ${formatCurrency(debt.amountCents)}`}
                         >
                           {debt.counterpartyName.substring(0, 15)}...
                         </div>
                       ))}
                       {events.dueDebts.length > 2 && (
-                        <div className="text-xs text-white/40">
+                        <div className="text-xs text-gray-600 dark:text-white/40">
                           +{events.dueDebts.length - 2} ещё
                         </div>
                       )}
@@ -472,14 +472,14 @@ export default function PaymentCalendarPage() {
                       {events.promises.slice(0, 2).map(promise => (
                         <div
                           key={promise.id}
-                          className="text-xs bg-green-500/20 text-green-300 rounded px-1 py-0.5 truncate"
+                          className="text-xs bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded px-1 py-0.5 truncate border border-green-200 dark:border-green-800"
                           title={`${promise.counterpartyName}: ${formatCurrency(promise.promisedAmountCents)}`}
                         >
                           💰 {promise.counterpartyName.substring(0, 12)}...
                         </div>
                       ))}
                       {events.promises.length > 2 && (
-                        <div className="text-xs text-white/40">
+                        <div className="text-xs text-gray-600 dark:text-white/40">
                           +{events.promises.length - 2} ещё
                         </div>
                       )}
@@ -519,11 +519,11 @@ function SummaryCard({ icon, label, value, subtitle, color }: {
   color: 'blue' | 'red' | 'green' | 'yellow' | 'gray';
 }) {
   const colorClasses = {
-    blue: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-    red: 'bg-red-500/20 text-red-300 border-red-500/30',
-    green: 'bg-green-500/20 text-green-300 border-green-500/30',
-    yellow: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-    gray: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
+    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+    red: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800',
+    green: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800',
+    yellow: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800',
+    gray: 'bg-gray-50 dark:bg-gray-900/20 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800',
   };
 
   return (

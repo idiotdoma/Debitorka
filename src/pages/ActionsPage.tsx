@@ -81,7 +81,7 @@ export default function ActionsPage() {
                   </h3>
                   <button
                     onClick={() => setShowContactForm(true)}
-                    className="text-xs px-2 py-1 bg-blue-600/20 text-blue-300 rounded-lg hover:bg-blue-600/30 transition"
+                    className="text-xs px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition"
                   >
                     <Plus className="w-3 h-3 inline mr-1" />Добавить
                   </button>

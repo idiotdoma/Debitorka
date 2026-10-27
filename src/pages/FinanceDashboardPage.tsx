@@ -61,12 +61,12 @@ export default function FinanceDashboardPage() {
   }
 
   const categoryColors: Record<DebtCategory, string> = {
-    not_overdue: 'bg-green-500/20 text-green-300 border-green-500/30',
-    days_1_7: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-    days_8_30: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-    days_31_60: 'bg-red-500/20 text-red-300 border-red-500/30',
-    days_60_plus: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-    no_due_date: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
+    not_overdue: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800',
+    days_1_7: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800',
+    days_8_30: 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800',
+    days_31_60: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800',
+    days_60_plus: 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+    no_due_date: 'bg-gray-50 dark:bg-gray-900/20 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800',
   };
 
   return (

@@ -344,11 +344,11 @@ function MetricCard({ icon, label, value, subtitle, color }: {
   color: 'blue' | 'red' | 'green' | 'yellow' | 'orange';
 }) {
   const colorClasses = {
-    blue: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-    red: 'bg-red-500/20 text-red-300 border-red-500/30',
-    green: 'bg-green-500/20 text-green-300 border-green-500/30',
-    yellow: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-    orange: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+    red: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800',
+    green: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800',
+    yellow: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800',
+    orange: 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800',
   };
 
   return (

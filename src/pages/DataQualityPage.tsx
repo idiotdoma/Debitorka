@@ -165,7 +165,7 @@ export default function DataQualityPage() {
                       {getTypeLabel(issue.type)}
                     </span>
                     {issue.resolvedAt && (
-                      <span className="px-2 py-0.5 bg-green-500/20 text-green-300 rounded text-xs">
+                      <span className="px-2 py-0.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded text-xs">
                         Решено
                       </span>
                     )}
@@ -188,7 +188,7 @@ export default function DataQualityPage() {
                         handleResolve(issue.id, resolution);
                       }
                     }}
-                    className="px-3 py-1 bg-green-600/20 text-green-300 rounded-lg text-xs hover:bg-green-600/30 transition"
+                    className="px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg text-xs hover:bg-green-100 dark:hover:bg-green-900/30 transition"
                   >
                     Отметить решённым
                   </button>

@@ -87,9 +87,9 @@ export default function UsersPage() {
                   <p className="text-white/40 text-xs">{getRoleMetadata(inv.role).label}</p>
                 </div>
                 <span className={`px-2 py-1 rounded text-xs ${
-                  inv.status === 'pending' ? 'bg-yellow-500/20 text-yellow-300' :
-                  inv.status === 'accepted' ? 'bg-green-500/20 text-green-300' :
-                  'bg-red-500/20 text-red-300'
+                  inv.status === 'pending' ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300' :
+                  inv.status === 'accepted' ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' :
+                  'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
                 }`}>
                   {inv.status === 'pending' ? 'Ожидает' : inv.status === 'accepted' ? 'Принято' : 'Отклонено'}
                 </span>

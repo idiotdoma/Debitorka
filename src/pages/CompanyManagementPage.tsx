@@ -206,10 +206,9 @@ function UsersTab({ organizationId, session, refresh, refreshKey }: {
                     {getRoleMetadata(inv.role).label} • Истекает {formatDate(inv.expiresAt)}
                   </p>
                 </div>
-                <span className="px-2 py-1 bg-yellow-500/20 text-yellow-300 rounded text-xs">
-                  Ожидает
-                </span>
-              </div>
+              <span className="px-2 py-1 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 rounded text-xs">
+                Ожидает
+              </span>              </div>
             ))}
           </div>
         </div>

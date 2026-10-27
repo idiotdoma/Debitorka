@@ -67,8 +67,8 @@ export default function ProfilePage() {
       {saveMessage && (
         <div className={`p-4 rounded-lg border ${
           saveMessage.type === 'success' 
-            ? 'bg-green-500/10 border-green-500/20 text-green-300' 
-            : 'bg-red-500/10 border-red-500/20 text-red-300'
+            ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' 
+            : 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
         }`}>
           {saveMessage.text}
         </div>
