@@ -43,22 +43,12 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
     user && item.roles.includes(user.role)
   );
 
-  const isLight = theme === 'light';
-
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${
-      isLight 
-        ? 'bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50' 
-        : 'bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900'
-    }`}>
+    <div className="min-h-screen transition-colors duration-300 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-900 dark:to-slate-900">
       {/* Mobile menu button */}
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className={`md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg transition-colors ${
-          isLight 
-            ? 'bg-white shadow-md text-gray-700 hover:bg-gray-100' 
-            : 'bg-slate-800 shadow-lg text-white hover:bg-slate-700'
-        }`}
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg transition-colors bg-white dark:bg-slate-800 shadow-md dark:shadow-lg text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-slate-700"
       >
         {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
@@ -66,26 +56,18 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
       {/* Sidebar */}
       <aside className={`fixed left-0 top-0 h-full w-64 flex flex-col z-40 transition-all duration-300 ${
         mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-      } ${
-        isLight
-          ? 'bg-white border-r border-gray-200 shadow-lg'
-          : 'bg-black/20 backdrop-blur-xl border-r border-white/10'
-      }`}>
+      } bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 shadow-lg`}>
         {/* Logo */}
-        <div className={`p-6 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
+        <div className="p-6 border-b border-gray-200 dark:border-slate-700">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${
-              isLight 
-                ? 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/30' 
-                : 'bg-blue-600 shadow-blue-600/30'
-            }`}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700">
               <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className={`font-bold text-lg leading-tight ${isLight ? 'text-gray-900' : 'text-white'}`}>
+              <h1 className="font-bold text-lg leading-tight text-gray-900 dark:text-white">
                 Дебиторка
               </h1>
-              <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-blue-200/40'}`}>
+              <p className="text-xs text-gray-500 dark:text-blue-200/60">
                 Контроль B2B
               </p>
             </div>
@@ -93,10 +75,10 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
         </div>
 
         {/* Organization info */}
-        <div className={`px-4 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/5'}`}>
+        <div className="px-4 py-3 border-b border-gray-200 dark:border-slate-700">
           <div className="flex items-center gap-2 text-xs">
-            <Users className={`w-3.5 h-3.5 ${isLight ? 'text-gray-400' : 'text-blue-300/50'}`} />
-            <span className={`truncate ${isLight ? 'text-gray-600' : 'text-blue-200/60'}`}>
+            <Users className="w-3.5 h-3.5 text-gray-400 dark:text-blue-300/50" />
+            <span className="truncate text-gray-600 dark:text-blue-200/60">
               {organization?.name}
             </span>
           </div>
@@ -116,12 +98,8 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all ${
                   isActive
-                    ? isLight
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm'
-                      : 'bg-blue-600/30 text-white border border-blue-500/30'
-                    : isLight
-                      ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                      : 'text-white/50 hover:text-white hover:bg-white/5'
+                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -132,17 +110,13 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
         </nav>
 
         {/* User info and theme toggle */}
-        <div className={`p-4 border-t ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
+        <div className="p-4 border-t border-gray-200 dark:border-slate-700">
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            className={`w-full flex items-center justify-center gap-2 px-3 py-2 mb-3 rounded-lg text-xs transition-colors ${
-              isLight
-                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                : 'bg-white/5 text-white/60 hover:bg-white/10'
-            }`}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 mb-3 rounded-lg text-xs transition-colors bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700"
           >
-            {isLight ? (
+            {theme === 'light' ? (
               <>
                 <Moon className="w-4 h-4" />
                 <span>Тёмная тема</span>
@@ -156,29 +130,23 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
           </button>
 
           <div className="flex items-center gap-3 mb-3">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-              isLight ? 'bg-blue-100' : 'bg-blue-600/30'
-            }`}>
-              <span className={`text-xs font-medium ${isLight ? 'text-blue-700' : 'text-blue-300'}`}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-100 dark:bg-blue-900/30">
+              <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
                 {user?.name?.charAt(0) || '?'}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className={`text-sm truncate ${isLight ? 'text-gray-900' : 'text-white'}`}>
+              <p className="text-sm truncate text-gray-900 dark:text-white">
                 {user?.name}
               </p>
-              <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/30'}`}>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 {user?.role}
               </p>
             </div>
           </div>
           <button
             onClick={logout}
-            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors ${
-              isLight
-                ? 'text-red-600 hover:bg-red-50'
-                : 'text-red-300/60 hover:text-red-300 hover:bg-red-500/10'
-            }`}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
           >
             <LogOut className="w-3.5 h-3.5" />
             Выйти

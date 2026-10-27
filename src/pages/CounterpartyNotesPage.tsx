@@ -59,36 +59,30 @@ export default function CounterpartyNotesPage() {
     refresh();
   };
 
-  const isLight = document.documentElement.classList.contains('light');
-
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className={`text-2xl md:text-3xl font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
           Заметки к контрагентам
         </h1>
-        <p className={`mt-1 ${isLight ? 'text-gray-600' : 'text-blue-200/60'}`}>
+        <p className="mt-1 text-gray-600 dark:text-blue-200/60">
           Быстрые заметки и комментарии по контрагентам
         </p>
       </div>
 
       {/* Выбор контрагента */}
-      <div className={`card p-6 ${isLight ? '' : 'bg-white/5 backdrop-blur border-white/10'}`}>
-        <label className={`block text-sm font-medium mb-2 ${isLight ? 'text-gray-700' : 'text-white/80'}`}>
+      <div className="card p-6 bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+        <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
           Выберите контрагента
         </label>
         <select
           value={selectedCounterparty}
           onChange={(e) => setSelectedCounterparty(e.target.value)}
-          className={`w-full px-4 py-2 rounded-lg transition-colors ${
-            isLight
-              ? 'bg-white border border-gray-300 text-gray-900 focus:border-blue-500'
-              : 'bg-white/5 border border-white/10 text-white focus:border-blue-500'
-          }`}
+          className="w-full px-4 py-2 rounded-lg transition-colors bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white focus:border-blue-500"
         >
           <option value="">-- Выберите контрагента --</option>
           {counterparties.map(cp => (
-            <option key={cp} value={cp} className={isLight ? 'bg-white' : 'bg-slate-800'}>
+            <option key={cp} value={cp} className="bg-white dark:bg-slate-800">
               {cp}
             </option>
           ))}
@@ -97,9 +91,9 @@ export default function CounterpartyNotesPage() {
 
       {/* Заметки */}
       {selectedCounterparty && (
-        <div className={`card p-6 ${isLight ? '' : 'bg-white/5 backdrop-blur border-white/10'}`}>
+        <div className="card p-6 bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
           <div className="flex items-center justify-between mb-4">
-            <h3 className={`text-lg font-semibold flex items-center gap-2 ${isLight ? 'text-gray-900' : 'text-white'}`}>
+            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
               <StickyNote className="w-5 h-5 text-yellow-500" />
               Заметки: {selectedCounterparty}
             </h3>
@@ -113,7 +107,7 @@ export default function CounterpartyNotesPage() {
           </div>
 
           {notes.length === 0 ? (
-            <div className={`text-center py-12 ${isLight ? 'text-gray-500' : 'text-white/40'}`}>
+            <div className="text-center py-12 text-gray-500 dark:text-white/40">
               <StickyNote className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>Нет заметок для этого контрагента</p>
             </div>
@@ -122,39 +116,27 @@ export default function CounterpartyNotesPage() {
               {notes.map(note => (
                 <div
                   key={note.id}
-                  className={`p-4 rounded-lg border transition-all hover:shadow-md ${
-                    isLight
-                      ? 'bg-yellow-50 border-yellow-200'
-                      : 'bg-yellow-500/10 border-yellow-500/20'
-                  }`}
+                  className="p-4 rounded-lg border transition-all hover:shadow-md bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
-                      <p className={`text-sm whitespace-pre-wrap ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                      <p className="text-sm whitespace-pre-wrap text-gray-900 dark:text-white">
                         {note.note}
                       </p>
-                      <p className={`text-xs mt-2 ${isLight ? 'text-gray-500' : 'text-white/40'}`}>
+                      <p className="text-xs mt-2 text-gray-500 dark:text-white/40">
                         {formatDate(note.createdAt)}
                       </p>
                     </div>
                     <div className="flex gap-2">
                       <button
                         onClick={() => setEditingNote(note)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          isLight
-                            ? 'hover:bg-yellow-100 text-gray-600'
-                            : 'hover:bg-yellow-500/20 text-white/60'
-                        }`}
+                        className="p-2 rounded-lg transition-colors hover:bg-yellow-100 dark:hover:bg-yellow-900/30 text-gray-600 dark:text-white/60"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteNote(note.id)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          isLight
-                            ? 'hover:bg-red-100 text-red-600'
-                            : 'hover:bg-red-500/20 text-red-400'
-                        }`}
+                        className="p-2 rounded-lg transition-colors hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -172,7 +154,6 @@ export default function CounterpartyNotesPage() {
         <NoteModal
           onClose={() => setShowAddModal(false)}
           onSave={handleAddNote}
-          isLight={isLight}
         />
       )}
 
@@ -182,33 +163,29 @@ export default function CounterpartyNotesPage() {
           initialNote={editingNote.note}
           onClose={() => setEditingNote(null)}
           onSave={(note) => handleUpdateNote(editingNote.id, note)}
-          isLight={isLight}
         />
       )}
     </div>
   );
 }
 
-function NoteModal({ initialNote = '', onClose, onSave, isLight }: {
+function NoteModal({ initialNote = '', onClose, onSave }: {
   initialNote?: string;
   onClose: () => void;
   onSave: (note: string) => void;
-  isLight: boolean;
 }) {
   const [note, setNote] = useState(initialNote);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className={`card p-6 w-full max-w-md ${isLight ? '' : 'bg-slate-800 border-white/10'}`}>
+      <div className="card p-6 w-full max-w-md bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
         <div className="flex items-center justify-between mb-4">
-          <h3 className={`text-lg font-semibold ${isLight ? 'text-gray-900' : 'text-white'}`}>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             {initialNote ? 'Редактировать заметку' : 'Новая заметка'}
           </h3>
           <button
             onClick={onClose}
-            className={`p-2 rounded-lg transition-colors ${
-              isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'
-            }`}
+            className="p-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-white/60"
           >
             <X className="w-5 h-5" />
           </button>
@@ -218,11 +195,7 @@ function NoteModal({ initialNote = '', onClose, onSave, isLight }: {
           onChange={(e) => setNote(e.target.value)}
           placeholder="Введите заметку..."
           rows={5}
-          className={`w-full px-4 py-3 rounded-lg resize-none transition-colors ${
-            isLight
-              ? 'bg-white border border-gray-300 text-gray-900 focus:border-blue-500'
-              : 'bg-white/5 border border-white/10 text-white focus:border-blue-500'
-          }`}
+          className="w-full px-4 py-3 rounded-lg resize-none transition-colors bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white focus:border-blue-500"
           autoFocus
         />
         <div className="flex gap-3 mt-4">

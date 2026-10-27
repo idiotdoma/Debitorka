@@ -65,15 +65,13 @@ export default function DashboardPage() {
 
   if (!data) return null;
 
-  const isLight = document.documentElement.classList.contains('light');
-
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className={`text-2xl md:text-3xl font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
           Дашборд
         </h1>
-        <p className={`mt-1 ${isLight ? 'text-gray-600' : 'text-blue-200/60'}`}>
+        <p className="mt-1 text-gray-600 dark:text-blue-200/60">
           Обзор дебиторской задолженности
         </p>
       </div>
@@ -110,8 +108,8 @@ export default function DashboardPage() {
       {/* Графики - адаптивная сетка */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Круговая диаграмма */}
-        <div className={`card p-6 ${isLight ? '' : 'bg-white/5 backdrop-blur border-white/10'}`}>
-          <h3 className={`text-lg font-semibold mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>
+        <div className="card p-6 bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
             Распределение по категориям
           </h3>
           {data.categoryData.length > 0 ? (
@@ -134,24 +132,24 @@ export default function DashboardPage() {
                 <Tooltip 
                   formatter={(value: number) => formatCurrency(value * 100)}
                   contentStyle={{
-                    backgroundColor: isLight ? '#fff' : '#1e293b',
-                    border: isLight ? '1px solid #e2e8f0' : '1px solid #475569',
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-primary)',
                     borderRadius: '8px',
-                    color: isLight ? '#0f172a' : '#f1f5f9',
+                    color: 'var(--text-primary)',
                   }}
                 />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className={`h-[300px] flex items-center justify-center ${isLight ? 'text-gray-500' : 'text-white/40'}`}>
+            <div className="h-[300px] flex items-center justify-center text-gray-500 dark:text-white/40">
               Нет данных для отображения
             </div>
           )}
         </div>
 
         {/* Столбчатая диаграмма */}
-        <div className={`card p-6 ${isLight ? '' : 'bg-white/5 backdrop-blur border-white/10'}`}>
-          <h3 className={`text-lg font-semibold mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>
+        <div className="card p-6 bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
             Топ-5 контрагентов
           </h3>
           {data.topCounterparties.length > 0 ? (
@@ -159,29 +157,29 @@ export default function DashboardPage() {
               <BarChart data={data.topCounterparties}>
                 <XAxis 
                   dataKey="name" 
-                  tick={{ fontSize: 12, fill: isLight ? '#64748b' : '#94a3b8' }}
+                  tick={{ fontSize: 12, fill: 'var(--text-tertiary)' }}
                   angle={-45}
                   textAnchor="end"
                   height={80}
                 />
                 <YAxis 
-                  tick={{ fontSize: 12, fill: isLight ? '#64748b' : '#94a3b8' }}
+                  tick={{ fontSize: 12, fill: 'var(--text-tertiary)' }}
                   tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
                 />
                 <Tooltip 
                   formatter={(value: number) => formatCurrency(value * 100)}
                   contentStyle={{
-                    backgroundColor: isLight ? '#fff' : '#1e293b',
-                    border: isLight ? '1px solid #e2e8f0' : '1px solid #475569',
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-primary)',
                     borderRadius: '8px',
-                    color: isLight ? '#0f172a' : '#f1f5f9',
+                    color: 'var(--text-primary)',
                   }}
                 />
-                <Bar dataKey="amount" fill={isLight ? '#3b82f6' : '#60a5fa'} radius={[8, 8, 0, 0]} />
+                <Bar dataKey="amount" fill="var(--accent-blue)" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className={`h-[300px] flex items-center justify-center ${isLight ? 'text-gray-500' : 'text-white/40'}`}>
+            <div className="h-[300px] flex items-center justify-center text-gray-500 dark:text-white/40">
               Нет данных для отображения
             </div>
           )}
@@ -189,8 +187,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Быстрые действия - мобильная адаптация */}
-      <div className={`card p-6 ${isLight ? '' : 'bg-white/5 backdrop-blur border-white/10'}`}>
-        <h3 className={`text-lg font-semibold mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>
+      <div className="card p-6 bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
           Быстрые действия
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -227,40 +225,28 @@ function KPICard({ icon, label, value, subtitle, color }: {
   subtitle?: string;
   color: 'blue' | 'red' | 'yellow' | 'green';
 }) {
-  const isLight = document.documentElement.classList.contains('light');
-  
   const colorClasses = {
-    blue: isLight 
-      ? 'bg-blue-50 text-blue-600 border-blue-200' 
-      : 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-    red: isLight 
-      ? 'bg-red-50 text-red-600 border-red-200' 
-      : 'bg-red-500/20 text-red-300 border-red-500/30',
-    yellow: isLight 
-      ? 'bg-yellow-50 text-yellow-600 border-yellow-200' 
-      : 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-    green: isLight 
-      ? 'bg-green-50 text-green-600 border-green-200' 
-      : 'bg-green-500/20 text-green-300 border-green-500/30',
+    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+    red: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 border-red-200 dark:border-red-800',
+    yellow: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800',
+    green: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-300 border-green-200 dark:border-green-800',
   };
 
   return (
-    <div className={`card p-5 transition-all hover:shadow-lg ${
-      isLight ? '' : 'bg-white/5 backdrop-blur border-white/10'
-    }`}>
+    <div className="card p-5 transition-all hover:shadow-lg bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
       <div className="flex items-center gap-3 mb-3">
         <div className={`p-2 rounded-lg border ${colorClasses[color]}`}>
           {icon}
         </div>
-        <span className={`text-sm ${isLight ? 'text-gray-600' : 'text-blue-200/60'}`}>
+        <span className="text-sm text-gray-600 dark:text-blue-200/60">
           {label}
         </span>
       </div>
-      <p className={`text-2xl font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>
+      <p className="text-2xl font-bold text-gray-900 dark:text-white">
         {value}
       </p>
       {subtitle && (
-        <p className={`text-xs mt-1 ${isLight ? 'text-gray-500' : 'text-white/40'}`}>
+        <p className="text-xs mt-1 text-gray-500 dark:text-white/40">
           {subtitle}
         </p>
       )}
@@ -273,21 +259,11 @@ function QuickAction({ icon, label, color }: {
   label: string;
   color: 'blue' | 'red' | 'yellow' | 'green';
 }) {
-  const isLight = document.documentElement.classList.contains('light');
-  
   const colorClasses = {
-    blue: isLight 
-      ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200' 
-      : 'bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 border-blue-500/30',
-    red: isLight 
-      ? 'bg-red-50 text-red-600 hover:bg-red-100 border-red-200' 
-      : 'bg-red-500/20 text-red-300 hover:bg-red-500/30 border-red-500/30',
-    yellow: isLight 
-      ? 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100 border-yellow-200' 
-      : 'bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30 border-yellow-500/30',
-    green: isLight 
-      ? 'bg-green-50 text-green-600 hover:bg-green-100 border-green-200' 
-      : 'bg-green-500/20 text-green-300 hover:bg-green-500/30 border-green-500/30',
+    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 border-blue-200 dark:border-blue-800',
+    red: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 border-red-200 dark:border-red-800',
+    yellow: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800',
+    green: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30 border-green-200 dark:border-green-800',
   };
 
   return (
