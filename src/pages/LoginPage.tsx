@@ -151,23 +151,28 @@ export default function LoginPage() {
             <p className="text-xs text-blue-200/60 mb-2 font-medium">Демо-доступ:</p>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="bg-white/5 rounded-lg p-2">
-                <p className="text-purple-300 font-medium">Владелец</p>
-                <p className="text-white/60">owner@demo.ru</p>
-                <p className="text-white/40">пароль: owner123</p>
+                <p className="text-purple-300 font-medium">Владелец (Орг. А)</p>
+                <p className="text-white/60">admin@alfa.ru</p>
+                <p className="text-white/40">пароль: admin123</p>
               </div>
               <div className="bg-white/5 rounded-lg p-2">
-                <p className="text-blue-300 font-medium">Руководитель</p>
-                <p className="text-white/60">manager@demo.ru</p>
+                <p className="text-blue-300 font-medium">Руководитель (Орг. А)</p>
+                <p className="text-white/60">manager@alfa.ru</p>
                 <p className="text-white/40">пароль: manager123</p>
               </div>
               <div className="bg-white/5 rounded-lg p-2">
-                <p className="text-yellow-300 font-medium">Сотрудник</p>
-                <p className="text-white/60">employee@demo.ru</p>
+                <p className="text-yellow-300 font-medium">Сотрудник (Орг. А)</p>
+                <p className="text-white/60">employee@alfa.ru</p>
                 <p className="text-white/40">пароль: employee123</p>
               </div>
               <div className="bg-white/5 rounded-lg p-2">
-                <p className="text-gray-300 font-medium">Наблюдатель</p>
-                <p className="text-white/60">viewer@demo.ru</p>
+                <p className="text-purple-300 font-medium">Владелец (Орг. Б)</p>
+                <p className="text-white/60">admin@beta.ru</p>
+                <p className="text-white/40">пароль: admin123</p>
+              </div>
+              <div className="bg-white/5 rounded-lg p-2">
+                <p className="text-gray-300 font-medium">Наблюдатель (Орг. Б)</p>
+                <p className="text-white/60">viewer@beta.ru</p>
                 <p className="text-white/40">пароль: viewer123</p>
               </div>
             </div>

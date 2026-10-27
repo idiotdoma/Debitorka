@@ -44,52 +44,70 @@ export function initializeDemoData(): void {
       id: generateId('user'),
       email: 'admin@alfa.ru',
       passwordHash: hashPassword('admin123'),
-      name: 'Иванов Иван (Администратор)',
+      name: 'Иванов Иван',
+      firstName: 'Иванов',
+      lastName: 'Иван',
       organizationId: orgA.id,
-      role: 'admin',
+      role: 'owner',
+      isActive: true,
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
     {
       id: generateId('user'),
       email: 'manager@alfa.ru',
       passwordHash: hashPassword('manager123'),
       name: 'Петрова Мария',
+      firstName: 'Петрова',
+      lastName: 'Мария',
       organizationId: orgA.id,
       role: 'manager',
+      isActive: true,
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: generateId('user'),
+      email: 'employee@alfa.ru',
+      passwordHash: hashPassword('employee123'),
+      name: 'Сидоров Алексей',
+      firstName: 'Сидоров',
+      lastName: 'Алексей',
+      organizationId: orgA.id,
+      role: 'employee',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
     {
       id: generateId('user'),
       email: 'admin@beta.ru',
       passwordHash: hashPassword('admin123'),
-      name: 'Сидоров Алексей (Администратор)',
+      name: 'Козлова Елена',
+      firstName: 'Козлова',
+      lastName: 'Елена',
       organizationId: orgB.id,
-      role: 'admin',
+      role: 'owner',
+      isActive: true,
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
     {
       id: generateId('user'),
       email: 'viewer@beta.ru',
       passwordHash: hashPassword('viewer123'),
-      name: 'Козлова Елена',
+      name: 'Новиков Петр',
+      firstName: 'Новиков',
+      lastName: 'Петр',
       organizationId: orgB.id,
       role: 'viewer',
+      isActive: true,
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
   ];
   
   users.forEach(user => userStore.create(user));
-  
-  // Обновляем роли для демо-пользователей
-  const adminA = userStore.getAll().find(u => u.email === 'admin@alfa.ru');
-  if (adminA) {
-    userStore.update(adminA.id, { role: 'owner' });
-  }
-  
-  const adminB = userStore.getAll().find(u => u.email === 'admin@beta.ru');
-  if (adminB) {
-    userStore.update(adminB.id, { role: 'owner' });
-  }
   
   // Создаём демо-данные задолженности для Org A
   const now = new Date();

@@ -65,7 +65,7 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {visibleNavItems.map(item => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;

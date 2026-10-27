@@ -15,6 +15,18 @@ export default function ReportsPage() {
   const [categoryFilter, setCategoryFilter] = useState<DebtCategory | 'all'>('all');
   const [counterpartyFilter, setCounterpartyFilter] = useState('');
 
+  const getReportTitle = (type: ReportType): string => {
+    const titles: Record<ReportType, string> = {
+      registry: 'Общий реестр задолженности',
+      overdue: 'Просроченная задолженность',
+      aging: 'Возрастная структура задолженности',
+      top_debtors: 'Крупнейшие должники',
+      no_due_date: 'Задолженность без срока оплаты',
+      promises_check: 'Обещания оплаты, требующие проверки',
+    };
+    return titles[type];
+  };
+
   const reportData = useMemo(() => {
     if (!session || !organization) return { data: [], title: '', columns: [] };
 
@@ -57,18 +69,6 @@ export default function ReportsPage() {
 
     return { data: debts, title, columns };
   }, [session, organization, reportType, categoryFilter, counterpartyFilter]);
-
-  const getReportTitle = (type: ReportType): string => {
-    const titles: Record<ReportType, string> = {
-      registry: 'Общий реестр задолженности',
-      overdue: 'Просроченная задолженность',
-      aging: 'Возрастная структура задолженности',
-      top_debtors: 'Крупнейшие должники',
-      no_due_date: 'Задолженность без срока оплаты',
-      promises_check: 'Обещания оплаты, требующие проверки',
-    };
-    return titles[type];
-  };
 
   const exportToCSV = () => {
     if (!reportData.data.length) return;
