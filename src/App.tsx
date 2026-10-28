@@ -58,7 +58,7 @@ function AppContent() {
 
   const renderPage = () => {
     switch (currentPage) {
-      case 'dashboard': return <DashboardPage />;
+      case 'dashboard': return <DashboardPage onNavigate={setCurrentPage} />;
       case 'debts': return <DebtListPage />;
       case 'import': return <ImportPage />;
       case 'tasks': return <TasksPage />;
@@ -79,7 +79,7 @@ function AppContent() {
       case 'reports': return <ReportsPage />;
       case 'data-quality': return <DataQualityPage />;
       case 'notes': return <CounterpartyNotesPage />;
-      default: return <DashboardPage />;
+      default: return <DashboardPage onNavigate={setCurrentPage} />;
     }
   };
 

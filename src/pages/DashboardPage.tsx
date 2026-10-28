@@ -6,7 +6,11 @@ import { canViewAllDebts } from '../lib/permissions';
 import { DollarSign, AlertTriangle, Clock, CheckCircle, TrendingUp, TrendingDown } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 
-export default function DashboardPage() {
+interface DashboardPageProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function DashboardPage({ onNavigate }: DashboardPageProps) {
   const { session, organization, user } = useAuth();
   
   const data = useMemo(() => {
@@ -196,21 +200,25 @@ export default function DashboardPage() {
             icon={<TrendingUp className="w-5 h-5" />}
             label="Финансовая аналитика"
             color="blue"
+            onClick={() => onNavigate?.('financial-analytics')}
           />
           <QuickAction
             icon={<AlertTriangle className="w-5 h-5" />}
             label="Просроченные задачи"
             color="red"
+            onClick={() => onNavigate?.('tasks')}
           />
           <QuickAction
             icon={<Clock className="w-5 h-5" />}
             label="Платёжный календарь"
             color="yellow"
+            onClick={() => onNavigate?.('payment-calendar')}
           />
           <QuickAction
             icon={<CheckCircle className="w-5 h-5" />}
             label="Мои задачи"
             color="green"
+            onClick={() => onNavigate?.('my-tasks')}
           />
         </div>
       </div>
@@ -254,10 +262,11 @@ function KPICard({ icon, label, value, subtitle, color }: {
   );
 }
 
-function QuickAction({ icon, label, color }: {
+function QuickAction({ icon, label, color, onClick }: {
   icon: React.ReactNode;
   label: string;
   color: 'blue' | 'red' | 'yellow' | 'green';
+  onClick?: () => void;
 }) {
   const colorClasses = {
     blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 border-blue-200 dark:border-blue-800',
@@ -267,7 +276,10 @@ function QuickAction({ icon, label, color }: {
   };
 
   return (
-    <button className={`flex items-center gap-3 p-4 rounded-xl border transition-all ${colorClasses[color]}`}>
+    <button 
+      onClick={onClick}
+      className={`flex items-center gap-3 p-4 rounded-xl border transition-all ${colorClasses[color]}`}
+    >
       {icon}
       <span className="text-sm font-medium">{label}</span>
     </button>
