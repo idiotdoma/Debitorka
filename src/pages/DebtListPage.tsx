@@ -105,17 +105,17 @@ export default function DebtListPage({ initialFilters, onDebtClick }: DebtListPa
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex items-center justify-between animate-slide-down">
         <div>
-          <h1 className="text-2xl font-bold text-white">Реестр задолженностей</h1>
-          <p className="text-blue-200/60 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Реестр задолженностей</h1>
+          <p className="text-gray-600 dark:text-blue-200/60 mt-1">
             {filteredDebts.length} из {allDebts.length} записей
           </p>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 animate-fade-in">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
           <input
@@ -177,32 +177,33 @@ export default function DebtListPage({ initialFilters, onDebtClick }: DebtListPa
         </select>
       </div>
 
-      <div className="bg-white/5 backdrop-blur rounded-2xl border border-white/10 overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 backdrop-blur rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden animate-slide-up shadow-lg">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/10">
-                <th className="text-left px-4 py-3 text-xs font-medium text-blue-200/60 uppercase">Контрагент</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-blue-200/60 uppercase">№-doc</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-blue-200/60 uppercase hidden md:table-cell">Дата doc</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-blue-200/60 uppercase">Срок оплаты</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-blue-200/60 uppercase">Сумма</th>
-                <th className="text-center px-4 py-3 text-xs font-medium text-blue-200/60 uppercase">Просрочка</th>
-                <th className="text-center px-4 py-3 text-xs font-medium text-blue-200/60 uppercase hidden lg:table-cell">Категория</th>
+              <tr className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-blue-200/80 uppercase tracking-wider">Контрагент</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-blue-200/80 uppercase tracking-wider">№-doc</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-blue-200/80 uppercase tracking-wider hidden md:table-cell">Дата doc</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-blue-200/80 uppercase tracking-wider">Срок оплаты</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600 dark:text-blue-200/80 uppercase tracking-wider">Сумма</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-600 dark:text-blue-200/80 uppercase tracking-wider">Просрочка</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-600 dark:text-blue-200/80 uppercase tracking-wider hidden lg:table-cell">Категория</th>
               </tr>
             </thead>
             <tbody>
               {paginatedDebts.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-white/40">
+                  <td colSpan={7} className="px-4 py-12 text-center text-gray-500 dark:text-white/40">
                     {allDebts.length === 0 ? 'Нет данных. Импортируйте файл с задолженностями.' : 'Нет записей по выбранным фильтрам'}
                   </td>
                 </tr>
               ) : (
-                paginatedDebts.map(debt => (
+                paginatedDebts.map((debt, index) => (
                   <tr 
                     key={debt.id} 
-                    className="border-b border-white/5 hover:bg-white/5 transition cursor-pointer"
+                    className="border-b border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-all duration-200 cursor-pointer stagger-item"
+                    style={{ animationDelay: `${index * 0.05}s` }}
                     onClick={() => onDebtClick?.(debt)}
                   >
                     <td className="px-4 py-3">

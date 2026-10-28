@@ -82,37 +82,45 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
 
       {/* KPI Cards - адаптивная сетка */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard
-          icon={<DollarSign className="w-5 h-5" />}
-          label="Общая задолженность"
-          value={formatCurrency(data.totalDebtCents)}
-          color="blue"
-        />
-        <KPICard
-          icon={<AlertTriangle className="w-5 h-5" />}
-          label="Просрочено"
-          value={formatCurrency(data.overdueDebtCents)}
-          subtitle={`${data.overdueCount} документов`}
-          color="red"
-        />
-        <KPICard
-          icon={<Clock className="w-5 h-5" />}
-          label="Мои задачи"
-          value={data.myTasks.toString()}
-          color="yellow"
-        />
-        <KPICard
-          icon={<CheckCircle className="w-5 h-5" />}
-          label="Выполнено"
-          value={data.completedTasks.toString()}
-          color="green"
-        />
+        <div className="stagger-item">
+          <KPICard
+            icon={<DollarSign className="w-5 h-5" />}
+            label="Общая задолженность"
+            value={formatCurrency(data.totalDebtCents)}
+            color="blue"
+          />
+        </div>
+        <div className="stagger-item">
+          <KPICard
+            icon={<AlertTriangle className="w-5 h-5" />}
+            label="Просрочено"
+            value={formatCurrency(data.overdueDebtCents)}
+            subtitle={`${data.overdueCount} документов`}
+            color="red"
+          />
+        </div>
+        <div className="stagger-item">
+          <KPICard
+            icon={<Clock className="w-5 h-5" />}
+            label="Мои задачи"
+            value={data.myTasks.toString()}
+            color="yellow"
+          />
+        </div>
+        <div className="stagger-item">
+          <KPICard
+            icon={<CheckCircle className="w-5 h-5" />}
+            label="Выполнено"
+            value={data.completedTasks.toString()}
+            color="green"
+          />
+        </div>
       </div>
 
       {/* Графики - адаптивная сетка */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Круговая диаграмма */}
-        <div className="card p-6 bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+        <div className="card p-6 bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 transition-all duration-300 hover:shadow-xl stagger-item">
           <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
             Распределение по категориям
           </h3>
@@ -152,7 +160,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
         </div>
 
         {/* Столбчатая диаграмма */}
-        <div className="card p-6 bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+        <div className="card p-6 bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 transition-all duration-300 hover:shadow-xl stagger-item">
           <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
             Топ-5 контрагентов
           </h3>
@@ -241,20 +249,20 @@ function KPICard({ icon, label, value, subtitle, color }: {
   };
 
   return (
-    <div className="card p-5 transition-all hover:shadow-lg bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+    <div className="card p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
       <div className="flex items-center gap-3 mb-3">
-        <div className={`p-2 rounded-lg border ${colorClasses[color]}`}>
+        <div className={`p-2 rounded-lg border transition-transform duration-300 hover:scale-110 ${colorClasses[color]}`}>
           {icon}
         </div>
         <span className="text-sm text-gray-600 dark:text-blue-200/60">
           {label}
         </span>
       </div>
-      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+      <p className="text-2xl font-bold text-gray-900 dark:text-white transition-all duration-300">
         {value}
       </p>
       {subtitle && (
-        <p className="text-xs mt-1 text-gray-500 dark:text-white/40">
+        <p className="text-xs mt-1 text-gray-500 dark:text-white/40 animate-fade-in">
           {subtitle}
         </p>
       )}
@@ -278,10 +286,12 @@ function QuickAction({ icon, label, color, onClick }: {
   return (
     <button 
       onClick={onClick}
-      className={`flex items-center gap-3 p-4 rounded-xl border transition-all ${colorClasses[color]}`}
+      className={`flex items-center gap-3 p-4 rounded-xl border transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 ${colorClasses[color]}`}
     >
-      {icon}
-      <span className="text-sm font-medium">{label}</span>
+      <div className="transition-transform duration-300 group-hover:scale-110">
+        {icon}
+      </div>
+      <span className="text-sm font-medium transition-all duration-300">{label}</span>
     </button>
   );
 }

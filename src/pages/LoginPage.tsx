@@ -42,17 +42,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-900 dark:to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 shadow-lg shadow-blue-600/30">
-            <Shield className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-900 dark:to-slate-900 flex items-center justify-center p-4 animate-gradient">
+      <div className="w-full max-w-md animate-fade-in-scale">
+        <div className="text-center mb-8 animate-slide-down">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 shadow-lg shadow-blue-600/30 animate-bounce-subtle">
+            <Shield className="w-8 h-8 text-white transition-transform duration-300 hover:scale-110 hover:rotate-12" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Дебиторка</h1>
           <p className="text-gray-600 dark:text-blue-200/70">Ежедневный контроль B2B-задолженности</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-8 shadow-xl">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-8 shadow-xl animate-fade-in-scale transition-all duration-300 hover:shadow-2xl">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
             {isRegister ? 'Регистрация организации' : 'Вход в систему'}
           </h2>
@@ -130,9 +130,14 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white font-medium rounded-xl transition shadow-lg shadow-blue-600/30"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white font-medium rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/30 hover:shadow-xl hover:scale-105 active:scale-95"
             >
-              {loading ? 'Загрузка...' : isRegister ? 'Зарегистрировать' : 'Войти'}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Загрузка...
+                </span>
+              ) : isRegister ? 'Зарегистрировать' : 'Войти'}
             </button>
           </form>
 
@@ -147,35 +152,35 @@ export default function LoginPage() {
         </div>
 
         {!isRegister && (
-          <div className="mt-6 bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+          <div className="mt-6 bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-gray-200 dark:border-slate-700 p-4 animate-slide-up">
             <p className="text-xs text-gray-600 dark:text-blue-200/60 mb-2 font-medium">Демо-доступ:</p>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-white dark:bg-slate-700 rounded-lg p-2">
+              <div className="bg-white dark:bg-slate-700 rounded-lg p-2 transition-all duration-300 hover:scale-105 hover:shadow-md stagger-item">
                 <p className="text-purple-600 dark:text-purple-300 font-medium">Владелец (Орг. А)</p>
                 <p className="text-gray-700 dark:text-white/60">admin@alfa.ru</p>
                 <p className="text-gray-500 dark:text-white/40">пароль: admin123</p>
               </div>
-              <div className="bg-white dark:bg-slate-700 rounded-lg p-2">
+              <div className="bg-white dark:bg-slate-700 rounded-lg p-2 transition-all duration-300 hover:scale-105 hover:shadow-md stagger-item">
                 <p className="text-blue-600 dark:text-blue-300 font-medium">Руководитель (Орг. А)</p>
                 <p className="text-gray-700 dark:text-white/60">manager@alfa.ru</p>
                 <p className="text-gray-500 dark:text-white/40">пароль: manager123</p>
               </div>
-              <div className="bg-white dark:bg-slate-700 rounded-lg p-2">
+              <div className="bg-white dark:bg-slate-700 rounded-lg p-2 transition-all duration-300 hover:scale-105 hover:shadow-md stagger-item">
                 <p className="text-green-600 dark:text-green-300 font-medium">Финансист (Орг. А)</p>
                 <p className="text-gray-700 dark:text-white/60">finance@alfa.ru</p>
                 <p className="text-gray-500 dark:text-white/40">пароль: finance123</p>
               </div>
-              <div className="bg-white dark:bg-slate-700 rounded-lg p-2">
+              <div className="bg-white dark:bg-slate-700 rounded-lg p-2 transition-all duration-300 hover:scale-105 hover:shadow-md stagger-item">
                 <p className="text-yellow-600 dark:text-yellow-300 font-medium">Сотрудник (Орг. А)</p>
                 <p className="text-gray-700 dark:text-white/60">employee@alfa.ru</p>
                 <p className="text-gray-500 dark:text-white/40">пароль: employee123</p>
               </div>
-              <div className="bg-white dark:bg-slate-700 rounded-lg p-2">
+              <div className="bg-white dark:bg-slate-700 rounded-lg p-2 transition-all duration-300 hover:scale-105 hover:shadow-md stagger-item">
                 <p className="text-purple-600 dark:text-purple-300 font-medium">Владелец (Орг. Б)</p>
                 <p className="text-gray-700 dark:text-white/60">admin@beta.ru</p>
                 <p className="text-gray-500 dark:text-white/40">пароль: admin123</p>
               </div>
-              <div className="bg-white dark:bg-slate-700 rounded-lg p-2">
+              <div className="bg-white dark:bg-slate-700 rounded-lg p-2 transition-all duration-300 hover:scale-105 hover:shadow-md stagger-item">
                 <p className="text-gray-600 dark:text-gray-300 font-medium">Наблюдатель (Орг. Б)</p>
                 <p className="text-gray-700 dark:text-white/60">viewer@beta.ru</p>
                 <p className="text-gray-500 dark:text-white/40">пароль: viewer123</p>
