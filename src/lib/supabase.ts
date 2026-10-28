@@ -1,19 +1,23 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
+// Создаём клиент только если переменные окружения настроены
+// В противном случае приложение работает в демо-режиме с localStorage
+export const supabase: SupabaseClient | null = 
+  supabaseUrl && supabasePublishableKey
+    ? createClient(supabaseUrl, supabasePublishableKey, {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+        },
+      })
+    : null;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-  },
-});
+// Флаг для проверки, настроен ли Supabase
+export const isSupabaseConfigured = supabase !== null;
 
 // Types for database models
 export interface Profile {
@@ -221,6 +225,7 @@ export interface Invitation {
 
 // API helper functions
 export async function getCurrentUser() {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
   
@@ -234,6 +239,7 @@ export async function getCurrentUser() {
 }
 
 export async function getUserOrganizations() {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
   
@@ -250,6 +256,7 @@ export async function getUserOrganizations() {
 }
 
 export async function createOrganization(name: string, timezone: string = 'Europe/Moscow') {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase.rpc('create_organization_for_current_user', {
     p_name: name,
     p_timezone: timezone,
@@ -260,6 +267,7 @@ export async function createOrganization(name: string, timezone: string = 'Europ
 }
 
 export async function getDebts(organizationId: string) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase
     .from('debt_records_current')
     .select('*')
@@ -271,6 +279,7 @@ export async function getDebts(organizationId: string) {
 }
 
 export async function getTasks(organizationId: string) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase
     .from('tasks')
     .select('*')
@@ -282,6 +291,7 @@ export async function getTasks(organizationId: string) {
 }
 
 export async function getCounterparties(organizationId: string) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase
     .from('counterparties')
     .select('*')
@@ -293,6 +303,7 @@ export async function getCounterparties(organizationId: string) {
 }
 
 export async function getPaymentPromises(organizationId: string) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase
     .from('payment_promises')
     .select('*')
@@ -304,6 +315,7 @@ export async function getPaymentPromises(organizationId: string) {
 }
 
 export async function getNotifications(organizationId: string) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
   
@@ -319,6 +331,7 @@ export async function getNotifications(organizationId: string) {
 }
 
 export async function markNotificationRead(notificationId: string) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { error } = await supabase
     .from('notifications')
     .update({ is_read: true })
@@ -328,6 +341,7 @@ export async function markNotificationRead(notificationId: string) {
 }
 
 export async function createTask(task: Omit<Task, 'id' | 'created_at' | 'updated_at'>) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase
     .from('tasks')
     .insert(task)
@@ -339,6 +353,7 @@ export async function createTask(task: Omit<Task, 'id' | 'created_at' | 'updated
 }
 
 export async function updateTask(taskId: string, updates: Partial<Task>) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase
     .from('tasks')
     .update(updates)
@@ -351,6 +366,7 @@ export async function updateTask(taskId: string, updates: Partial<Task>) {
 }
 
 export async function createCommunication(communication: Omit<Communication, 'id' | 'created_at' | 'updated_at'>) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase
     .from('communications')
     .insert(communication)
@@ -362,6 +378,7 @@ export async function createCommunication(communication: Omit<Communication, 'id
 }
 
 export async function createPaymentPromise(promise: Omit<PaymentPromise, 'id' | 'created_at' | 'updated_at' | 'actual_receipt_verified' | 'transfer_history'>) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase
     .from('payment_promises')
     .insert({
@@ -377,6 +394,7 @@ export async function createPaymentPromise(promise: Omit<PaymentPromise, 'id' | 
 }
 
 export async function getDebtAnalytics(organizationId: string) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase
     .from('debt_analytics_by_currency')
     .select('*')
@@ -387,6 +405,7 @@ export async function getDebtAnalytics(organizationId: string) {
 }
 
 export async function getDebtAging(organizationId: string) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase
     .from('debt_aging_by_currency')
     .select('*')
@@ -397,6 +416,7 @@ export async function getDebtAging(organizationId: string) {
 }
 
 export async function getDebtByCounterparty(organizationId: string) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase
     .from('debt_analytics_by_counterparty')
     .select('*')
@@ -413,6 +433,7 @@ export async function commitManualImport(
   rows: any[],
   warnings: any[] = []
 ) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase.rpc('commit_manual_import', {
     p_organization_id: organizationId,
     p_import_batch_id: importBatchId,
@@ -430,6 +451,7 @@ export async function createInvitation(
   role: string,
   teamId?: string
 ) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase.rpc('create_org_invitation', {
     p_organization_id: organizationId,
     p_email: email,
@@ -442,6 +464,7 @@ export async function createInvitation(
 }
 
 export async function acceptInvitation(token: string) {
+  if (!supabase) throw new Error('Supabase not configured');
   const { data, error } = await supabase.rpc('accept_org_invitation', {
     p_token: token,
   });
