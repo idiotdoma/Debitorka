@@ -18,6 +18,7 @@ export default function ReportsPage() {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showLoadModal, setShowLoadModal] = useState(false);
   const [saveName, setSaveName] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const getReportTitle = (type: ReportType): string => {
     const titles: Record<ReportType, string> = {
@@ -70,21 +71,62 @@ export default function ReportsPage() {
           contactName: p.contactName,
           promisedDate: formatDate(p.promisedDate),
           promisedAmountCents: p.promisedAmountCents,
+          promisedAmountFormatted: formatCurrency(p.promisedAmountCents),
           status: p.status,
+          statusLabel: p.status === 'expected' ? 'Ожидается' : p.status === 'fulfilled' ? 'Выполнено' : p.status === 'broken' ? 'Нарушено' : p.status,
           source: p.source,
           comment: p.comment || '',
         }));
         
         const title = getReportTitle(reportType);
         return {
-           promisesData,
+          data: promisesData,
           title,
           columns: [
             { key: 'counterpartyName', label: 'Контрагент' },
             { key: 'contactName', label: 'Контакт' },
             { key: 'promisedDate', label: 'Обещанная дата' },
-            { key: 'promisedAmountCents', label: 'Сумма' },
-            { key: 'status', label: 'Статус' },
+            { key: 'promisedAmountFormatted', label: 'Сумма' },
+            { key: 'statusLabel', label: 'Статус' },
+            { key: 'source', label: 'Источник' },
+            { key: 'comment', label: 'Комментарий' },
+          ]
+        };
+      }
+      case 'promises_check': {
+        // Отчёт по обещаниям, требующим проверки (просроченные)
+        const allPromises = promiseStore.getAll(organization.id, session);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const overduePromises = allPromises.filter(p => {
+          if (p.status !== 'expected') return false;
+          const promiseDate = new Date(p.promisedDate);
+          promiseDate.setHours(0, 0, 0, 0);
+          return promiseDate < today;
+        });
+        
+        const promisesCheckData = overduePromises.map(p => ({
+          counterpartyName: p.counterpartyName,
+          contactName: p.contactName,
+          promisedDate: formatDate(p.promisedDate),
+          daysOverdue: Math.floor((today.getTime() - new Date(p.promisedDate).getTime()) / (1000 * 60 * 60 * 24)),
+          promisedAmountCents: p.promisedAmountCents,
+          promisedAmountFormatted: formatCurrency(p.promisedAmountCents),
+          source: p.source,
+          comment: p.comment || '',
+        }));
+        
+        const title = getReportTitle(reportType);
+        return {
+          data: promisesCheckData,
+          title,
+          columns: [
+            { key: 'counterpartyName', label: 'Контрагент' },
+            { key: 'contactName', label: 'Контакт' },
+            { key: 'promisedDate', label: 'Обещанная дата' },
+            { key: 'daysOverdue', label: 'Просрочка (дни)' },
+            { key: 'promisedAmountFormatted', label: 'Сумма' },
             { key: 'source', label: 'Источник' },
             { key: 'comment', label: 'Комментарий' },
           ]
@@ -136,7 +178,7 @@ export default function ReportsPage() {
   const savedViews = useMemo(() => {
     if (!session || !organization || !user) return [];
     return savedReportViewStore.getByUser(user.id, organization.id, session);
-  }, [session, organization, user]);
+  }, [session, organization, user, refreshKey]);
 
   // Сохранение представления
   const handleSaveView = () => {
@@ -159,6 +201,7 @@ export default function ReportsPage() {
     savedReportViewStore.create(view);
     setSaveName('');
     setShowSaveModal(false);
+    setRefreshKey(k => k + 1);
   };
 
   // Загрузка представления
@@ -173,6 +216,7 @@ export default function ReportsPage() {
   const handleDeleteView = (viewId: string) => {
     if (!session || !organization) return;
     savedReportViewStore.delete(viewId, organization.id, session);
+    setRefreshKey(k => k + 1);
   };
 
   const exportToCSV = () => {
@@ -184,11 +228,11 @@ export default function ReportsPage() {
         let value = debt[col.key];
         
         // Форматирование значений
-        if (col.key === 'amountCents' || col.key === 'totalAmount') {
+        if (col.key === 'amountCents' || col.key === 'totalAmount' || col.key === 'promisedAmountCents') {
           value = (value / 100).toFixed(2);
         } else if (col.key === 'category') {
           value = DEBT_CATEGORIES[value as DebtCategory]?.label || value;
-        } else if (col.key === 'docDate' || col.key === 'dueDate') {
+        } else if (col.key === 'docDate' || col.key === 'dueDate' || col.key === 'promisedDate') {
           value = value ? formatDate(value) : '';
         } else if (col.key === 'percentage') {
           value = value + '%';
@@ -308,6 +352,14 @@ export default function ReportsPage() {
             }`}
           >
             Обещания оплаты
+          </button>
+          <button
+            onClick={() => setReportType('promises_check')}
+            className={`px-4 py-2 rounded-lg text-sm transition ${
+              reportType === 'promises_check' ? 'bg-blue-600 text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'
+            }`}
+          >
+            Просроченные обещания
           </button>
         </div>
       </div>

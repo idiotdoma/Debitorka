@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { debtStore, taskStore } from '../lib/store';
 import { formatCurrency } from '../lib/calculations';
+import { prepareDebtsForAnalytics } from '../lib/debtCalculations';
 import { canViewAllDebts } from '../lib/permissions';
 import { DollarSign, AlertTriangle, Clock, CheckCircle, TrendingUp, TrendingDown } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
@@ -16,17 +17,17 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
   const data = useMemo(() => {
     if (!session || !organization || !user) return null;
     
-    const debts = canViewAllDebts(user.role) 
+    const allDebts = canViewAllDebts(user.role) 
       ? debtStore.getAll(organization.id, session)
       : [];
+    
+    // Используем единую логику подготовки данных
+    const { actualDebts: debts, unsupportedCurrencyDebts, negativeDebts } = prepareDebtsForAnalytics(allDebts);
     
     const tasks = taskStore.getByAssignee(user.id, organization.id, session);
     
     const totalDebtCents = debts.reduce((sum, d) => sum + d.amountCents, 0);
-    const overdueDebts = debts.filter(d => {
-      if (!d.dueDate) return false;
-      return new Date(d.dueDate) < new Date();
-    });
+    const overdueDebts = debts.filter(d => d.overdueDays !== null && d.overdueDays > 0);
     const overdueDebtCents = overdueDebts.reduce((sum, d) => sum + d.amountCents, 0);
     
     const myTasks = tasks;
@@ -64,6 +65,8 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
       completedTasks: completedTasks.length,
       categoryData,
       topCounterparties,
+      unsupportedCurrencyCount: unsupportedCurrencyDebts.length,
+      negativeCount: negativeDebts.length,
     };
   }, [session, organization, user]);
 
@@ -116,6 +119,26 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
           />
         </div>
       </div>
+
+      {/* Предупреждения о проблемах с данными */}
+      {(data.unsupportedCurrencyCount > 0 || data.negativeCount > 0) && (
+        <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 animate-fade-in">
+          <p className="text-yellow-700 dark:text-yellow-300 text-sm mb-2">
+            <strong>⚠️ Внимание:</strong> Обнаружены проблемы с данными, которые исключены из расчётов:
+          </p>
+          <ul className="text-yellow-600 dark:text-yellow-400 text-xs space-y-1">
+            {data.unsupportedCurrencyCount > 0 && (
+              <li>• {data.unsupportedCurrencyCount} документов с неподдерживаемой валютой</li>
+            )}
+            {data.negativeCount > 0 && (
+              <li>• {data.negativeCount} документов с отрицательной суммой (кредитовые остатки)</li>
+            )}
+          </ul>
+          <p className="text-yellow-600 dark:text-yellow-400 text-xs mt-2">
+            Проверьте страницу "Качество данных" для получения подробной информации.
+          </p>
+        </div>
+      )}
 
       {/* Графики - адаптивная сетка */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

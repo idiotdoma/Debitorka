@@ -363,6 +363,16 @@ export function executeImport(
   
   const allErrors: ImportError[] = errorRows.flatMap(r => r.errors);
   
+  // Определяем статус импорта
+  let status: 'completed' | 'partial' | 'failed';
+  if (validRows.length === 0) {
+    status = 'failed';
+  } else if (errorRows.length > 0) {
+    status = 'partial';
+  } else {
+    status = 'completed';
+  }
+  
   const batch: ImportBatch = {
     id: batchId,
     organizationId,
@@ -375,7 +385,7 @@ export function executeImport(
     updatedCount,
     newCount,
     missingFromSource,
-    status: validRows.length > 0 ? 'completed' : 'failed',
+    status,
     errors: allErrors,
     importedBy: userId,
     createdAt: now,
@@ -383,8 +393,8 @@ export function executeImport(
   
   importStore.create(batch);
   
-  // Создаём снимок задолженности только при успешном импорте
-  if (batch.status === 'completed' && validRows.length > 0) {
+  // Создаём снимок задолженности только при полном успешном импорте (без ошибок)
+  if (status === 'completed' && validRows.length > 0) {
     try {
       const snapshot = createDebtSnapshot(organizationId, batchId);
       snapshotStore.create(snapshot);

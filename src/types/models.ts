@@ -399,7 +399,7 @@ export interface ImportBatch {
   updatedCount: number; // количество обновлённых записей
   newCount: number; // количество новых записей
   missingFromSource: number; // записей, отсутствующих в новой выгрузке
-  status: 'preview' | 'completed' | 'failed';
+  status: 'preview' | 'completed' | 'partial' | 'failed';
   errors: ImportError[];
   importedBy: UUID;
   createdAt: string;

@@ -142,19 +142,29 @@ export default function PaymentCalendarPage() {
   const getEventsForDay = (date: Date) => {
     if (!data) return { dueDebts: [], promises: [], overdue: [] };
 
-    const dateStr = date.toISOString().split('T')[0];
+    // Используем локальную дату для избежания сдвига из-за часовых поясов
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
     
     const dueDebts = data.allDebts.filter(d => d.dueDate === dateStr);
     const promises = data.allPromises.filter(p => {
       const promiseDate = new Date(p.promisedDate);
       promiseDate.setHours(0, 0, 0, 0);
-      return promiseDate.toISOString().split('T')[0] === dateStr && p.status === 'expected';
+      const promiseYear = promiseDate.getFullYear();
+      const promiseMonth = String(promiseDate.getMonth() + 1).padStart(2, '0');
+      const promiseDay = String(promiseDate.getDate()).padStart(2, '0');
+      const promiseDateStr = `${promiseYear}-${promiseMonth}-${promiseDay}`;
+      return promiseDateStr === dateStr && p.status === 'expected';
     });
     const overdue = data.allDebts.filter(d => {
       if (!d.dueDate) return false;
       const dueDate = new Date(d.dueDate);
       dueDate.setHours(0, 0, 0, 0);
-      return dueDate < date && d.overdueDays !== null && d.overdueDays > 0;
+      const compareDate = new Date(date);
+      compareDate.setHours(0, 0, 0, 0);
+      return dueDate < compareDate && d.overdueDays !== null && d.overdueDays > 0;
     });
 
     return { dueDebts, promises, overdue };
@@ -433,7 +443,7 @@ export default function PaymentCalendarPage() {
             {calendarDays.map((day, idx) => {
               const events = getEventsForDay(day.date);
               const isToday = day.date.toDateString() === new Date().toDateString();
-              const hasEvents = events.dueDebts.length > 0 || events.promises.length > 0;
+              const hasEvents = events.dueDebts.length > 0 || events.promises.length > 0 || events.overdue.length > 0;
               
               return (
                 <div
@@ -442,7 +452,7 @@ export default function PaymentCalendarPage() {
                     day.isCurrentMonth
                       ? 'bg-white/5 border-white/10'
                       : 'bg-white/[0.02] border-white/5'
-                  } ${isToday ? 'ring-2 ring-blue-500' : ''}`}
+                  } ${isToday ? 'ring-2 ring-blue-500' : ''} ${events.overdue.length > 0 ? 'bg-red-500/5 border-red-500/20' : ''}`}
                 >
                   <div className={`text-xs font-medium mb-1 ${
                     day.isCurrentMonth ? 'text-white' : 'text-white/40'
@@ -452,6 +462,22 @@ export default function PaymentCalendarPage() {
                   
                   {hasEvents && (
                     <div className="space-y-1">
+                      {/* Просроченные документы */}
+                      {events.overdue.slice(0, 1).map(debt => (
+                        <div
+                          key={`overdue-${debt.id}`}
+                          className="text-xs bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded px-1 py-0.5 truncate border border-red-200 dark:border-red-800"
+                          title={`Просрочено: ${debt.counterpartyName} - ${formatCurrency(debt.amountCents)}`}
+                        >
+                          ⚠️ {debt.counterpartyName.substring(0, 12)}...
+                        </div>
+                      ))}
+                      {events.overdue.length > 1 && (
+                        <div className="text-xs text-red-600 dark:text-red-400">
+                          +{events.overdue.length - 1} просроч.
+                        </div>
+                      )}
+                      
                       {/* Срок оплаты */}
                       {events.dueDebts.slice(0, 2).map(debt => (
                         <div
@@ -491,7 +517,7 @@ export default function PaymentCalendarPage() {
           </div>
 
           {/* Легенда календаря */}
-          <div className="mt-6 flex gap-4 text-xs">
+          <div className="mt-6 flex gap-4 text-xs flex-wrap">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-blue-500/20 border border-blue-500/30 rounded"></div>
               <span className="text-white/60">Срок оплаты</span>
@@ -499,6 +525,10 @@ export default function PaymentCalendarPage() {
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-green-500/20 border border-green-500/30 rounded"></div>
               <span className="text-white/60">Обещание оплаты</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-red-500/20 border border-red-500/30 rounded"></div>
+              <span className="text-white/60">Просрочено</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 ring-2 ring-blue-500 rounded"></div>

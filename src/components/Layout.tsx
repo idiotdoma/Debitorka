@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { canViewAllDebts, canCreateTasks, canManageUsers, canViewFinanceAnalytics, canUseAI } from '../lib/permissions';
 import { LayoutDashboard, Upload, List, Target, LogOut, Shield, Users, History, Settings, CheckSquare, Bell, Sparkles, Menu, X, Sun, Moon } from 'lucide-react';
+import DemoModeWarning from './DemoModeWarning';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -45,6 +46,9 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
 
   return (
     <div className="min-h-screen transition-colors duration-300 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-blue-900 dark:to-slate-900">
+      {/* Demo Mode Warning */}
+      <DemoModeWarning />
+      
       {/* Mobile menu button */}
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

@@ -54,9 +54,11 @@ export default function HistoryPage() {
                   </div>
                 </div>
                 <span className={`px-2 py-1 rounded text-xs font-medium ${
-                  batch.status === 'completed' ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                  batch.status === 'completed' ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' :
+                  batch.status === 'partial' ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300' :
+                  'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
                 }`}>
-                  {batch.status === 'completed' ? 'Успешно' : 'Ошибка'}
+                  {batch.status === 'completed' ? 'Успешно' : batch.status === 'partial' ? 'Частично' : 'Ошибка'}
                 </span>
               </div>
 
